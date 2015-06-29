@@ -24,7 +24,9 @@
 
   networking.hostName = "nixi"; # Define your hostname.
   networking.hostId = "bac8c473";
-  networking.wireless.enable = true;  # Enables wireless.
+  # networking.wireless.enable = true;  # Enables wireless.
+  networking.networkmanager.enable = true;
+  services.dbus.enable = true;
 
   # Select internationalisation properties.
   i18n = {
@@ -36,7 +38,7 @@
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
-    wget git
+    wget git kde4.networkmanagement
   ];
 
   # List services that you want to enable:
@@ -62,5 +64,12 @@
   #   isNormalUser = true;
   #   uid = 1000;
   # };
-
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.extraUsers.hyper = {
+    createHome = true;
+    isNormalUser = true;
+    group = "users";
+    extraGroups = [ "networkmanager" ];
+    uid = 1000;
+  };
 }
