@@ -65,11 +65,15 @@
   #   uid = 1000;
   # };
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.defaultUserShell = "/var/run/current-system/sw/bin/bash";
   users.extraUsers.hyper = {
     createHome = true;
+    home = "/home/hyper";
+    description = "hyper";
     isNormalUser = true;
     group = "users";
     extraGroups = [ "networkmanager" ];
     uid = 1000;
+    useDefaultShell = true;
   };
 }
