@@ -39,6 +39,7 @@ in
   networking.hostId = "bac8c473";
   # networking.wireless.enable = true;  # Enables wireless.
   networking.networkmanager.enable = true;
+  networking.firewall.allowPing = true;
   services.dbus.enable = true;
 
   # Select internationalisation properties.
