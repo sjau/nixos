@@ -22,6 +22,14 @@
     }
   ];
 
+  fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
+  fileSystems."/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
+  fileSystems."/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
+
+
+  # Trust hydra. Needed for one-click installations.
+  nix.trustedBinaryCaches = [ "http://hydra.nixos.org" ];
+
   networking.hostName = "nixi"; # Define your hostname.
   networking.hostId = "bac8c473";
   # networking.wireless.enable = true;  # Enables wireless.
@@ -67,10 +75,37 @@
     description = "hyper";
     isNormalUser = true;
     group = "users";
-    extraGroups = [ "networkmanager" ];
+    extraGroups = [ "networkmanager" "vboxusers" ];
     uid = 1000;
     useDefaultShell = true;
   };
+  fileSystems."/home/hyper/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
+
+  fonts = {
+    enableFontDir = true;
+    enableCoreFonts = true;
+    enableGhostscriptFonts = true;
+    fonts = with pkgs ; [
+      liberation_ttf
+      ttf_bitstream_vera
+      dejavu_fonts
+      terminus_font
+      bakoma_ttf
+      clearlyU
+      cm_unicode
+      andagii
+      bakoma_ttf
+      inconsolata
+      gentium
+    ];
+  };
+
+  # SMART.
+  services.smartd.enable = true;
+  services.smartd.devices = [ { device = "/dev/sda"; } ];
+
+  # Time.
+  time.timeZone = "Europe/Zurich";
 
   # Add the NixOS Manual on virtual console 8
   services.nixosManual.showManual = true;
@@ -82,7 +117,7 @@
 #    apache2
 #    build-essential
     chromium
-#    cifs-utils
+    cifs_utils
     filezilla
     ghostscript
     gimp
@@ -90,13 +125,18 @@
     htop
     imagemagick
     iotop
+    kde4.kdepim
+    kde4.konversation
     kde4.networkmanagement
-#    konversation
+    kde4.oxygen_icons
+    libreoffice
     mc
 #    mysql-client
 #    mysql-server
     nox
     openvpn
+    oxygen-gtk2
+    oxygen-gtk3
     pass
     pastebinit
     pdftk
@@ -107,6 +147,7 @@
 #    qt5-default
 #    qt5-qmake
 #    qtbase5-dev-tools
+    qt5Full
     recoll
 #    rssowl2
     smartmontools
