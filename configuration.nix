@@ -4,6 +4,11 @@
 
 { config, pkgs, ... }:
 
+let
+  myPwd = "myPassword"; # Set default password for various things
+
+
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -86,8 +91,12 @@
         post_max_size = 800M
         upload_max_filesize = 200M
         session.gc_maxlifetime = 144000
+        date.timezone = "CET"
     '';
   };
+
+  # Install Virtualbox
+  services.virtualboxHost.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.extraUsers.guest = {
@@ -157,18 +166,14 @@
     kde4.oxygen_icons
     libreoffice
     mc
-#    mysql-client
-#    mysql-server
-    nox
+    mysql
+    nox # Easy search for packages
     openvpn
     oxygen-gtk2
     oxygen-gtk3
     pass
     pastebinit
     pdftk
-#    php5
-#    php5-curl
-#    php5-mysql
 #    plasma-theme-oxygen
 #    qt5-default
 #    qt5-qmake
@@ -185,8 +190,6 @@
     tmux
     unetbootin
     unoconv
-#    usb-creator-kde
-#    virtualbox
     vlc
     wget
 #    whois
