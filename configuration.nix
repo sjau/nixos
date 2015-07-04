@@ -62,6 +62,33 @@
   services.xserver.displayManager.kdm.enable = true;
   services.xserver.desktopManager.kde4.enable = true;
 
+  # Install apache
+  services.httpd = {
+    enable = true;
+    documentRoot = "/var/www/html";
+    adminAddr = "admin@localhost";
+    extraModules = [
+      { name = "php5"; path = "${pkgs.php}/modules/libphp5.so"; }
+    ];
+    extraConfig = ''
+      <Directory /var/www/html>
+        DirectoryIndex index.php
+        Order deny,allow
+        Allow from *
+      </Directory>
+    '';
+    # PHP
+    enablePHP = true;
+    phpOptions = ''
+        max_execution_time = 3000
+        max_input_time = 600
+        memory_limit = 1280M
+        post_max_size = 800M
+        upload_max_filesize = 200M
+        session.gc_maxlifetime = 144000
+    '';
+  };
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.extraUsers.guest = {
   #   isNormalUser = true;
@@ -114,7 +141,6 @@
   # $ nix-env -qaP | grep wget
   nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
-#    apache2
 #    build-essential
     chromium
     cifs_utils
