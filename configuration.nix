@@ -174,10 +174,34 @@ in
     htop
     imagemagick
     iotop
+    kde4.applications
+#   kde4.kactivities
+    kde4.kdeadmin
+#   kde4.kdeartwork
+    kde4.kdeaccessibility
+    kde4.kdebase_workspace
+    kde4.kdebindings
+    kde4.kdevelop
+#    kde4.kdevplatform
+#    kde4.kdeedu
+    kde4.kdegames
+    kde4.kdegraphics
+    kde4.kdelibs
+#    kde4.kdenetwork
     kde4.kdepim
+    kde4.kdepimlibs
+#    kde4.kdesdk
+#    kde4.kdetoys
+    kde4.kdewebdev
+    kde4.kde_baseapps
+    kde4.kde_base_artwork
+    kde4.kde_wallpapers
     kde4.konversation
+    kde4.kdemultimedia
+    kde4.kdeplasma_addons
     kde4.networkmanagement
     kde4.oxygen_icons
+    kde4.kdeutils
     libreoffice
     mc
     mysql
