@@ -76,4 +76,8 @@
     uid = 1000;
     useDefaultShell = true;
   };
+
+  # Add the NixOS Manual on virtual console 8
+  services.nixosManual.showManual = true;
+
 }
