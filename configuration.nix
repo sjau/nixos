@@ -35,11 +35,6 @@
     defaultLocale = "en_US.UTF-8";
   };
 
-  # List packages installed in system profile. To search by name, run:
-  # $ nix-env -qaP | grep wget
-  environment.systemPackages = with pkgs; [
-    wget git kde4.networkmanagement
-  ];
 
   # List services that you want to enable:
 
@@ -79,5 +74,11 @@
 
   # Add the NixOS Manual on virtual console 8
   services.nixosManual.showManual = true;
+
+  # List packages installed in system profile. To search by name, run:
+  # $ nix-env -qaP | grep wget
+  environment.systemPackages = with pkgs; [
+    wget git kde4.networkmanagement
+  ];
 
 }
