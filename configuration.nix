@@ -77,8 +77,52 @@
 
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
+  nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
-    wget git kde4.networkmanagement
+#    apache2
+#    build-essential
+    chromium
+#    cifs-utils
+    filezilla
+    ghostscript
+    gimp
+    git
+    htop
+    imagemagick
+    iotop
+    kde4.networkmanagement
+#    konversation
+    mc
+#    mysql-client
+#    mysql-server
+    nox
+    openvpn
+    pass
+    pastebinit
+    pdftk
+#    php5
+#    php5-curl
+#    php5-mysql
+#    plasma-theme-oxygen
+#    qt5-default
+#    qt5-qmake
+#    qtbase5-dev-tools
+    recoll
+#    rssowl2
+    smartmontools
+    smplayer
+    skype
+    sysfsutils
+    sudo
+#    suisseid-pkcs11
+    tmux
+    unetbootin
+    unoconv
+#    usb-creator-kde
+#    virtualbox
+    vlc
+    wget
+#    whois
   ];
 
 }
