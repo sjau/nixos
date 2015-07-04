@@ -27,7 +27,7 @@ in
     }
   ];
 
-  fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
+#  fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
   fileSystems."/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
   fileSystems."/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
 
@@ -64,10 +64,18 @@ in
   services.xserver.xkbOptions = "eurosign:e";
 
   # Enable the KDE Desktop Environment.
-  services.xserver.displayManager.kdm.enable = true;
+  services.xserver.displayManager.kdm = {
+    enable = true;
+    extraConfig = ''
+      [X-:0-Core]
+      AutoLoginEnable=true
+      AutoLoginUser=hyper
+      AutoLoginPass=${myPwd}
+    '';
+  };
   services.xserver.desktopManager.kde4.enable = true;
 
-  # Install apache
+  # Enable apache
   services.httpd = {
     enable = true;
     documentRoot = "/var/www/html";
@@ -95,8 +103,14 @@ in
     '';
   };
 
-  # Install Virtualbox
+  # Enable Virtualbox
   services.virtualboxHost.enable = true;
+
+  # Enable Avahi for local domain resoltuion
+  services.avahi = {
+    enable = true;
+    nssmdns = true;
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.extraUsers.guest = {
