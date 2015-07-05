@@ -219,7 +219,6 @@ in
   # $ nix-env -qaP | grep wget
   nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
-#    build-essential
     chromium
     cifs_utils
     filezilla
@@ -229,6 +228,7 @@ in
     htop
     imagemagick
     iotop
+    jwhois
     kde4.applications
 #   kde4.kactivities
     kde4.kdeadmin
@@ -236,17 +236,17 @@ in
     kde4.kdeaccessibility
     kde4.kdebase_workspace
     kde4.kdebindings
-    kde4.kdevelop
-#    kde4.kdevplatform
 #    kde4.kdeedu
     kde4.kdegames
     kde4.kdegraphics
     kde4.kdelibs
-#    kde4.kdenetwork
+    kde4.kdenetwork
     kde4.kdepim
     kde4.kdepimlibs
-#    kde4.kdesdk
+    kde4.kdesdk
 #    kde4.kdetoys
+    kde4.kdevelop
+    kde4.kdevplatform
     kde4.kdewebdev
     kde4.kde_baseapps
     kde4.kde_base_artwork
@@ -277,6 +277,7 @@ in
     smartmontools
     smplayer
     skype
+    stdenv # build-essential on nixos
     sysfsutils
     sudo
 #    suisseid-pkcs11
@@ -285,7 +286,6 @@ in
     unoconv
     vlc
     wget
-#    whois
   ];
 
 }
