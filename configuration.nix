@@ -288,6 +288,9 @@ in
     unoconv
     vlc
     wget
+    (pkgs.callPackage ./suisseid-pkcs11.nix {})
+    (pkgs.callPackage ./swisssign-pin-entry.nix {})
   ];
+
 
 }
