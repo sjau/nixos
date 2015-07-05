@@ -261,6 +261,7 @@ in
     mc
     mysql
     nox # Easy search for packages
+    openssl
     openvpn
     oxygen-gtk2
     oxygen-gtk3
@@ -272,6 +273,7 @@ in
 #    qt5-qmake
 #    qtbase5-dev-tools
     qt5Full
+    qt5SDK
     recoll
 #    rssowl2
     smartmontools
