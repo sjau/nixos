@@ -5,7 +5,9 @@
 { config, pkgs, ... }:
 
 let
+  myUser = "hyper";
   myPwd = "myPassword"; # Set default password for various things
+  myHostName = "nixi";
 
 
 in
@@ -27,6 +29,15 @@ in
     }
   ];
 
+  hardware = {
+    # Hardware settings
+    cpu.intel.updateMicrocode = true;
+    enableAllFirmware = true;
+    pulseaudio.enable = true;
+    pulseaudio.systemWide = true;
+  };
+
+
 #  fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
   fileSystems."/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
   fileSystems."/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
@@ -35,11 +46,16 @@ in
   # Trust hydra. Needed for one-click installations.
   nix.trustedBinaryCaches = [ "http://hydra.nixos.org" ];
 
-  networking.hostName = "nixi"; # Define your hostname.
-  networking.hostId = "bac8c473";
-  # networking.wireless.enable = true;  # Enables wireless.
-  networking.networkmanager.enable = true;
-  networking.firewall.allowPing = true;
+  # Setup networking
+  networking = {
+    hostName = "${myHostName}"; # Define your hostname.
+    hostId = "bac8c473";
+  #  enable = true;  # Enables wireless. Disable when using network manager
+    networkmanager.enable = true;
+    firewall.allowPing = true;
+  };
+
+  # Enable dbus
   services.dbus.enable = true;
 
   # Select internationalisation properties.
@@ -50,31 +66,36 @@ in
   };
 
 
-  # List services that you want to enable:
-
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-  services.openssh.permitRootLogin = "yes";
+  services.openssh = {
+    enable = true;
+    permitRootLogin = "yes";
+  };
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.xserver.layout = "ch";
-  services.xserver.xkbOptions = "eurosign:e";
-
-  # Enable the KDE Desktop Environment.
-  services.xserver.displayManager.kdm = {
+  services.xserver = {
     enable = true;
-    extraConfig = ''
-      [X-:0-Core]
-      AutoLoginEnable=true
-      AutoLoginUser=hyper
-      AutoLoginPass=${myPwd}
-    '';
+    layout = "ch";
+    xkbOptions = "eurosign:e";
+    synaptics = {
+        enable = true;
+    };
+
+     # Enable the KDE Desktop Environment.
+    displayManager.kdm = {
+      enable = true;
+      extraConfig = ''
+        [X-:0-Core]
+        AutoLoginEnable=true
+        AutoLoginUser=hyper
+        AutoLoginPass=${myPwd}
+      '';
+    };
+    desktopManager.kde4.enable = true;
   };
-  services.xserver.desktopManager.kde4.enable = true;
 
   # Enable apache
   services.httpd = {
@@ -110,25 +131,40 @@ in
   # Enable Avahi for local domain resoltuion
   services.avahi = {
     enable = true;
+    hostName = "${myHostName}";
     nssmdns = true;
+    publishing = true;
+  };
+
+  # Enable nscd
+  services.nscd = {
+    enable = true;
+  };
+
+  # Enable ntp
+  services.ntp = {
+    enable = true;
+    servers = [ "0.ch.pool.ntp.org" "1.ch.pool.ntp.org" "2.ch.pool.ntp.org" "3.ch.pool.ntp.org" ];
+  };
+
+  # Enable sudo
+  security.sudo = {
+    enable = true;
+    wheelNeedsPassword = true;
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.extraUsers.guest = {
-  #   isNormalUser = true;
-  #   uid = 1000;
-  # };
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.defaultUserShell = "/var/run/current-system/sw/bin/bash";
-  users.extraUsers.hyper = {
+  users.extraUsers.${myUser} = {
     createHome = true;
-    home = "/home/hyper";
-    description = "hyper";
+    home = "/home/${myUser}";
+    description = "${myUser}";
     isNormalUser = true;
     group = "users";
-    extraGroups = [ "networkmanager" "vboxusers" ];
+    extraGroups = [ "networkmanager" "vboxusers" "wheel" ]; # wheel is for the sudo group
     uid = 1000;
     useDefaultShell = true;
+    password = "${myPwd}";
   };
   fileSystems."/home/hyper/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
 
@@ -151,15 +187,31 @@ in
     ];
   };
 
-  # SMART.
-  services.smartd.enable = true;
-  services.smartd.devices = [ { device = "/dev/sda"; } ];
+  # Enable smartmon daemon
+  services.smartd = {
+    enable = true;
+    devices = [ { device = "/dev/sda"; } ];
+  };
+
+  # Enable smartcard daemon
+  services.pcscd = {
+    enable = true;
+  };
 
   # Time.
   time.timeZone = "Europe/Zurich";
 
   # Add the NixOS Manual on virtual console 8
   services.nixosManual.showManual = true;
+
+  # Setup nano
+  programs.nano.nanorc = ''
+    set nowrap
+    set tabstospaces
+    set tabsize 4
+    set const
+    # include /usr/share/nano/sh.nanorc
+  '';
 
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
