@@ -274,6 +274,7 @@ in
 #    qtbase5-dev-tools
     qt5Full
     qt5SDK
+    recode
     recoll
 #    rssowl2
     smartmontools
@@ -291,6 +292,11 @@ in
     (pkgs.callPackage ./suisseid-pkcs11.nix {})
     (pkgs.callPackage ./swisssign-pin-entry.nix {})
   ];
+
+# suisseid-pkcs11 requires on ubuntu the following packages:
+# fontconfig fontconfig-config fonts-dejavu-core libaudio2 libccid libfontconfig1 libice6 libjbig0 libjpeg-turbo8 libjpeg8 libqt-declarative
+# libqt4-network libqt4-script libqt4-sql libqt4-xml libqt4-xmlpatterns libqt4core4 libqtdbus4 libqtgui4 libsm6 libtiff5 libxi6 libxrender1
+# libxt6 pcscd qtcore4-l10n suisseid-pkcs11 swisssign-pin-entry x11-common
 
 
 }
