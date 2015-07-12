@@ -225,9 +225,12 @@ in
     ghostscript
     gimp
     git
+    gnome.gtk
     htop
     imagemagick
     iotop
+    jdk
+    jre
     jwhois
     kde4.applications
 #   kde4.kactivities
@@ -281,9 +284,10 @@ in
     smplayer
     skype
     stdenv # build-essential on nixos
-    sysfsutils
     sudo
 #    suisseid-pkcs11
+    swt
+    sysfsutils
     tmux
     unetbootin
     unoconv
@@ -291,6 +295,7 @@ in
     wget
     (pkgs.callPackage ./suisseid-pkcs11.nix {})
     (pkgs.callPackage ./swisssign-pin-entry.nix {})
+    (pkgs.callPackage ./swisssigner.nix {})
   ];
 
 # suisseid-pkcs11 requires on ubuntu the following packages:
