@@ -295,7 +295,7 @@ in
     wget
     (pkgs.callPackage ./suisseid-pkcs11.nix {})
     (pkgs.callPackage ./swisssign-pin-entry.nix {})
-    (pkgs.callPackage ./swisssigner.nix {})
+#    (pkgs.callPackage ./swisssigner.nix {})
   ];
 
 # suisseid-pkcs11 requires on ubuntu the following packages:

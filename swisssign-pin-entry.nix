@@ -1,4 +1,4 @@
-{ stdenv, fetchurl }:
+{ stdenv, fetchurl, gcc }:
 
 stdenv.mkDerivation rec {
   name = "swisssign-pin-entry-${version}";
@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
   '';
 
   buildPhase = let
-    rpaths = [ stdenv.gcc.gcc ];
+    rpaths = [ gcc ];
   in ''
     for i in lib/*.so; do
       patchelf --set-rpath "${stdenv.lib.makeLibraryPath rpaths}" "$i"

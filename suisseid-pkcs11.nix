@@ -1,4 +1,4 @@
-{ stdenv, fetchurl }:
+{ stdenv, fetchurl, gcc }:
 
 stdenv.mkDerivation rec {
   name = "suisseid-pkcs11-${version}";
@@ -7,7 +7,7 @@ stdenv.mkDerivation rec {
   src = fetchurl {
     url = "http://update.swisssign.com/media/stick/repository/dists/unstable"
         + "/non-free/binary-amd64/suisseid-pkcs11_1.0.4292-1_amd64.deb";
-    sha256 = "05qp5k079796dfpj76pcdbl3r2m7g0wjp66i9siphzkdzci0gbr1";
+    sha256 = "21af0722fb6d7e78a34ed1982b3978a78a3ce86aec9a23af6b269d74c02c1717";
   };
 
   unpackCmd = ''
@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
   '';
 
   buildPhase = let
-    rpaths = [ stdenv.gcc.gcc ];
+    rpaths = [ gcc ];
   in ''
     for i in lib/*.so; do
       patchelf --set-rpath "${stdenv.lib.makeLibraryPath rpaths}" "$i"

@@ -1,4 +1,4 @@
-{ stdenv, fetchurl }:
+{ stdenv, fetchurl, gcc }:
 
 stdenv.mkDerivation rec {
   name = "swisssigner-${version}";
@@ -9,7 +9,7 @@ stdenv.mkDerivation rec {
   src = fetchurl {
     url = "http://update.swisssign.com/media/stick/repository/dists/unstable"
         + "/non-free/binary-amd64/swisssigner_2.1.543-1_amd64.deb";
-    sha256 = "bd6e3afe67f2c1bd435016c090c433d222626d17c6e730a98fe5248a6ad84b1b";
+    sha256 = "4c4d08f19d671a9a1bbf68fa2f6e0624775ff68fccfc4ce3832030734088a287";
   };
 
   unpackCmd = ''
@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
   '';
 
   buildPhase = let
-    rpaths = [ stdenv.gcc.gcc ];
+    rpaths = [ gcc ];
   in ''
     for i in lib/*.so; do
       patchelf --set-rpath "${stdenv.lib.makeLibraryPath rpaths}" "$i"
