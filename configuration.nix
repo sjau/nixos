@@ -27,6 +27,7 @@ in
 
   boot.initrd.luks.devices = [
     {
+                          # device = "/dev/disk/by-label/nixos";
       name = "crypto_root"; device = "/dev/disk/by-uuid/3d8128bc-834e-4403-9339-e166a7c534b6";
     }
   ];
@@ -129,6 +130,7 @@ in
 
   # Enable Virtualbox
   services.virtualboxHost.enable = true;
+  nixpkgs.config.virtualbox.enableExtensionPack = true;
 
   # Enable Avahi for local domain resoltuion
   services.avahi = {
@@ -277,6 +279,7 @@ in
 #    qtbase5-dev-tools
     qt5Full
     qt5SDK
+    qtpass
     recode
     recoll
 #    rssowl2
@@ -288,6 +291,7 @@ in
 #    suisseid-pkcs11
     swt
     sysfsutils
+    teamspeak_client
     tmux
     unetbootin
     unoconv
