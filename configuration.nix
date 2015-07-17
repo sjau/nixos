@@ -8,7 +8,8 @@
 
 let
     myUser      = "hyper";
-    myPwd       = "";
+    myPwd       = "***";
+    myCIFS      = "***";
     myHostName  = "subi";
 
 #    myUser      = "${builtins.readFile /root/.nixos/myUser}";
@@ -20,6 +21,7 @@ in
     # Check if custom vars are set
     assert myUser       != "";
     assert myPwd        != "";
+    assert myCIFS       != "";
     assert myHostName   != "";
 
 
@@ -48,7 +50,34 @@ in
         #pulseaudio.systemWide = true;
     };
 
+/*
+    fileSystems = {
+        "/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
+        "/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
+        "/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
+    } //
+        (let
+            makeFileSystems = { name }: {
+                inherit name;
+                value = {
+                    device = "//10.0.0.10/${name}";
+                    fsType = "cifs";
+                    options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+                };
+            };
+        in builtins.listToAttrs (map makeFileSystems [
+               { name = "Audio"; }
+               { name = "Shows"; }
+               { name = "SJ"; }
+               { name = "Video"; }
+               { name = "backup"; }
+               { name = "hyper"; }
+               { name = "eeePC"; }
+        ]));
+*/
 
+
+    fileSystems."/home/hyper/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
     fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
     fileSystems."/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
     fileSystems."/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
@@ -57,43 +86,46 @@ in
     fileSystems."/mnt/Audio" = {
         device = "//10.0.0.10/Audio";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=mayday12345,iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/Shows" = {
         device = "//10.0.0.10/Shows";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=mayday12345,iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/SJ" = {
         device = "//10.0.0.10/SJ";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=mayday12345,iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/Video" = {
         device = "//10.0.0.10/Video";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=mayday12345,iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/backup" = {
         device = "//10.0.0.10/backup";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=mayday12345,iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/eeePC" = {
         device = "//10.0.0.10/eeePC";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=mayday12345,iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/hyper" = {
         device = "//10.0.0.10/hyper";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=mayday12345,iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/jus-law" = {
         device = "//vpn-data.jus-law.ch/Advo";
         fsType = "cifs";
         options = "noauto,user,uid=1000,gid=100,username=none,password=none,iocharset=utf8";
     };
+
+
+
 
     # Create some folders
     system.activationScripts.media = ''
@@ -256,7 +288,6 @@ in
         useDefaultShell = true;
         password = "${myPwd}";
     };
-    fileSystems."/home/hyper/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
 
     fonts = {
         enableFontDir = true;
@@ -317,6 +348,16 @@ in
     # Enable smartcard daemon
     services.pcscd = {
         enable = true;
+    };
+
+    # Enable btsync
+    services.btsync = {
+        enable = true;
+        deviceName = "${myHostName}";
+        enableWebUI = true;
+        httpListenAddr = "127.0.0.1";
+        httpLogin = "${myUser}";
+        httpPass = "${myPwd}";
     };
 
     # Time.
