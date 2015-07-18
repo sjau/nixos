@@ -281,10 +281,10 @@ in
         systemCronJobs = [
             "0 2 * * * bash /root/backup.sh >> /dev/null 2>&1"
             "0 */6 * * * bash /root/ssd_level_wear.sh >> /dev/null 2>&1"
-            "10 * * * * nice php -f /var/www/html/e/abc_spider.php >/dev/null 2>&1"
-            "25 * * * * nice php -f /var/www/html/e/ei_spider.php >/dev/null 2>&1"
-            "40 * * * * nice php -f /var/www/html/e/news_spider.php >/dev/null 2>&1"
-            "55 * * * * nice php -f /var/www/html/e/si_spider.php >/dev/null 2>&1"
+            "10 * * * * /run/current-system/sw/bin/nice /run/current-system/sw/bin/php -f /var/www/html/e/abc_spider.php >/dev/null 2>&1"
+            "25 * * * * /run/current-system/sw/bin/nice /run/current-system/sw/bin/php -f /var/www/html/e/ei_spider.php >/dev/null 2>&1"
+            "40 * * * * /run/current-system/sw/bin/nice /run/current-system/sw/bin/php -f /var/www/html/e/news_spider.php >/dev/null 2>&1"
+            "55 * * * * /run/current-system/sw/bin/nice /run/current-system/sw/bin/php -f /var/www/html/e/si_spider.php >/dev/null 2>&1"
         ];
     };
     
@@ -499,6 +499,7 @@ in
 #       plasma-theme-oxygen
         php     # PHP-Cli
         pinentry
+        psmisc
         qt5Full
         qt5SDK
         qtpass
