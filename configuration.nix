@@ -275,6 +275,19 @@ in
         servers = [ "0.ch.pool.ntp.org" "1.ch.pool.ntp.org" "2.ch.pool.ntp.org" "3.ch.pool.ntp.org" ];
     };
 
+    # Enable cron
+    services.cron = {
+        enable = true;
+        systemCronJobs = [
+            "0 2 * * * bash /root/backup.sh >> /dev/null 2>&1"
+            "0 */6 * * * bash /root/ssd_level_wear.sh >> /dev/null 2>&1"
+            "10 * * * * nice php -f /var/www/html/e/abc_spider.php >/dev/null 2>&1"
+            "25 * * * * nice php -f /var/www/html/e/ei_spider.php >/dev/null 2>&1"
+            "40 * * * * nice php -f /var/www/html/e/news_spider.php >/dev/null 2>&1"
+            "55 * * * * nice php -f /var/www/html/e/si_spider.php >/dev/null 2>&1"
+        ];
+    };
+    
     # Setuid
     security.setuidPrograms = [ "mount.cifs" ];
 
