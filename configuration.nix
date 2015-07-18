@@ -243,6 +243,15 @@ in
         '';
     };
 
+    # Enable mysql
+    services.mysql = {
+        enable = true;
+        dataDir = "/var/mysql";
+        rootPassword = "/root/.nixos/myPwd";
+        user = "mysql";
+        package = pkgs.mysql;
+    };
+    
     # Enable Virtualbox
     services.virtualboxHost.enable = true;
     nixpkgs.config.virtualbox.enableExtensionPack = true;
@@ -369,8 +378,7 @@ in
 
     # Enable Locate
     services.locate.enable = true;
-        
-    
+
     # Time.
     time.timeZone = "Europe/Zurich";
 
@@ -466,7 +474,7 @@ in
         mc
         mplayer
         mumble
-        mysql55
+#        mysql55
         nox     # Easy search for packages
         openvpn
         openssl
@@ -476,6 +484,7 @@ in
         pastebinit
         pdftk
 #       plasma-theme-oxygen
+        php     # PHP-Cli
         pinentry
         qt5Full
         qt5SDK
