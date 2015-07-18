@@ -359,7 +359,18 @@ in
         httpLogin = "${myUser}";
         httpPass = "${myPwd}";
     };
+    
+    # Enable Syncthing
+    services.syncthing = {
+        enable = true;
+        dataDir = "/home/hyper/Desktop/Syncthing";
+        user = "${myUser}";
+    };
 
+    # Enable Locate
+    services.locate.enable = true;
+        
+    
     # Time.
     time.timeZone = "Europe/Zurich";
 
@@ -378,11 +389,19 @@ in
     # List packages installed in system profile. To search by name, run:
     # $ nix-env -qaP | grep wget
     nixpkgs.config.allowUnfree = true;
+    #nixpkgs.config.firefox = {
+    #        enableAdobeFlash = true;
+    #};
+    nixpkgs.config.chromium = {
+        enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works 
+    };
+
+    
     environment.systemPackages = with pkgs; [
         chromium
         cifs_utils
         filezilla
-        firefox
+        firefoxWrapper
         ghostscript
         gimp
         git
