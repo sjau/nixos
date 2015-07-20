@@ -279,15 +279,21 @@ in
     services.cron = {
         enable = true;
         systemCronJobs = [
-            "0 2 * * * bash /root/backup.sh >> /dev/null 2>&1"
-            "0 */6 * * * bash /root/ssd_level_wear.sh >> /dev/null 2>&1"
-            "10 * * * * /run/current-system/sw/bin/nice /run/current-system/sw/bin/php -f /var/www/html/e/abc_spider.php >/dev/null 2>&1"
-            "25 * * * * /run/current-system/sw/bin/nice /run/current-system/sw/bin/php -f /var/www/html/e/ei_spider.php >/dev/null 2>&1"
-            "40 * * * * /run/current-system/sw/bin/nice /run/current-system/sw/bin/php -f /var/www/html/e/news_spider.php >/dev/null 2>&1"
-            "55 * * * * /run/current-system/sw/bin/nice /run/current-system/sw/bin/php -f /var/www/html/e/si_spider.php >/dev/null 2>&1"
+            "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
+            "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
+            "10 * * * * hyper nice php -f /var/www/html/e/abc_spider.php >/dev/null 2>&1"
+            "25 * * * * hyper nice php -f /var/www/html/e/ei_spider.php >/dev/null 2>&1"
+            "40 * * * * hyper nice php -f /var/www/html/e/news_spider.php >/dev/null 2>&1"
+            "55 * * * * hyper nice php -f /var/www/html/e/si_spider.php >/dev/null 2>&1"
         ];
     };
-    
+   
+    # Enable Syslog
+    #services.syslogd = {
+    #    enable = true;
+    #    tty = "9";
+    #};
+        
     # Setuid
     security.setuidPrograms = [ "mount.cifs" ];
 
