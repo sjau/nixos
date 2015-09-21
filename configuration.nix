@@ -382,17 +382,6 @@ in
         enable = true;
     };
 
-    # Enable btsync
-#    services.btsync = {
-#        enable = true;
-#        deviceName = "${mySecrets.hostname}";
-#        enableWebUI = true;
-#        httpListenAddr = "127.0.0.1";
-#        httpListenPort = 9000;
-#        httpLogin = "${mySecrets.user}";
-#        httpPass = "${mySecrets.passwd}";
-#    };
-    
     # Enable Syncthing
     services.syncthing = {
         enable = true;
