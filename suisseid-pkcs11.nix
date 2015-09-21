@@ -1,5 +1,7 @@
-{ stdenv, fetchurl, gcc }:
-
+{ stdenv, fetchurl, pcsclite, callPackage }:
+let
+  pin-entry = callPackage ./swisssign-pin-entry.nix {};
+in
 stdenv.mkDerivation rec {
   name = "suisseid-pkcs11-${version}";
   version = "1.0.4292";
@@ -15,9 +17,11 @@ stdenv.mkDerivation rec {
   '';
 
   buildPhase = let
-    rpaths = [ gcc ];
+    rpaths = [ pcsclite stdenv.cc.cc ];
   in ''
     for i in lib/*.so; do
+      echo "${stdenv.lib.makeLibraryPath rpaths}"
+      echo "$i"
       patchelf --set-rpath "${stdenv.lib.makeLibraryPath rpaths}" "$i"
     done
   '';
@@ -28,6 +32,7 @@ stdenv.mkDerivation rec {
     for i in lib/*.so; do
       install -vD "$i" "$out/lib/$(basename "$i")"
     done
+
+    ln -s ${pin-entry}/lib/libcvP11LCB.so $out/lib/libcvP11LCB.so
   '';
 }
-

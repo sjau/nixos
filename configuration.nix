@@ -7,22 +7,18 @@
 { config, pkgs, ... }:
 
 let
-    myUser      = "hyper";
-    myPwd       = "***";
-    myCIFS      = "***";
-    myHostName  = "subi";
 
-#    myUser      = "${builtins.readFile /root/.nixos/myUser}";
-#    myPwd       = "${builtins.readFile /root/.nixos/myPwd}";
-#    myHostName  = "${builtins.readFile /root/.nixos/myHostName}";
+    # Create file in import path looking like:   { user = 'username'; passwd = 'password'; cifs = 'cifspassword'; hostname = 'hostname'; }
+    # This info is in a different file, so that the config can bit tracked by git without revealing sensitive infos. Feel free to expand
+    mySecrets  = import /root/.nixos/mySecrets.nix;
 
 
 in
     # Check if custom vars are set
-    assert myUser       != "";
-    assert myPwd        != "";
-    assert myCIFS       != "";
-    assert myHostName   != "";
+    assert mySecrets.user       != "";
+    assert mySecrets.passwd     != "";
+    assert mySecrets.cifs       != "";
+    assert mySecrets.hostname   != "";
 
 
 {
@@ -48,6 +44,8 @@ in
         enableAllFirmware = true;
         pulseaudio.enable = true;
         #pulseaudio.systemWide = true;
+        opengl.driSupport32Bit = true;  # Required for Steam
+        pulseaudio.support32Bit = true; # Required for Steam
     };
 
 /*
@@ -62,7 +60,7 @@ in
                 value = {
                     device = "//10.0.0.10/${name}";
                     fsType = "cifs";
-                    options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+                    options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
                 };
             };
         in builtins.listToAttrs (map makeFileSystems [
@@ -86,37 +84,37 @@ in
     fileSystems."/mnt/Audio" = {
         device = "//10.0.0.10/Audio";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/Shows" = {
         device = "//10.0.0.10/Shows";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/SJ" = {
         device = "//10.0.0.10/SJ";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/Video" = {
         device = "//10.0.0.10/Video";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/backup" = {
         device = "//10.0.0.10/backup";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/eeePC" = {
         device = "//10.0.0.10/eeePC";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/hyper" = {
         device = "//10.0.0.10/hyper";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${myCIFS},iocharset=utf8,sec=ntlm";
+        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
     };
     fileSystems."/mnt/jus-law" = {
         device = "//vpn-data.jus-law.ch/Advo";
@@ -145,11 +143,14 @@ in
 
     # Setup networking
     networking = {
-        hostName = "${myHostName}"; # Define your hostname.
+        hostName = "${mySecrets.hostname}"; # Define your hostname.
         hostId = "bac8c473";
         #  enable = true;  # Enables wireless. Disable when using network manager
         networkmanager.enable = true;
         firewall.allowPing = true;
+        firewall.allowedUDPPorts = [ 21025 21026 22000 22026 ];
+        firewall.allowedTCPPorts = [ 22000 ];
+        # Syncthing: 21025 21026 22000 22026
         extraHosts = ''
             127.0.0.1       ivwbox.de
             127.0.0.1       *.ivwbox.de
@@ -187,7 +188,10 @@ in
     };
 
     # Enable CUPS to print documents.
-    # services.printing.enable = true;
+    services.printing = {
+        enable = true;
+        drivers = [ pkgs.gutenprint pkgs.hplip ];
+    };
 
     # Enable the X11 windowing system.
     services.xserver = {
@@ -205,7 +209,7 @@ in
                 [X-:0-Core]
                 AutoLoginEnable=true
                 AutoLoginUser=hyper
-                AutoLoginPass=${myPwd}
+                AutoLoginPass=${mySecrets.passwd}
             '';
         };
         desktopManager.kde4.enable = true;
@@ -247,19 +251,19 @@ in
     services.mysql = {
         enable = true;
         dataDir = "/var/mysql";
-        rootPassword = "/root/.nixos/myPwd";
+        rootPassword = "${mySecrets.passwd}";
         user = "mysql";
         package = pkgs.mysql;
     };
     
     # Enable Virtualbox
-    services.virtualboxHost.enable = true;
+    virtualisation.virtualbox.host.enable = true;
     nixpkgs.config.virtualbox.enableExtensionPack = true;
 
     # Enable Avahi for local domain resoltuion
     services.avahi = {
         enable = true;
-        hostName = "${myHostName}";
+        hostName = "${mySecrets.hostname}";
         nssmdns = true;
         publishing = true;
     };
@@ -305,16 +309,16 @@ in
 
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users.defaultUserShell = "/var/run/current-system/sw/bin/bash";
-    users.extraUsers.${myUser} = {
+    users.extraUsers.${mySecrets.user} = {
         createHome = true;
-        home = "/home/${myUser}";
-        description = "${myUser}";
+        home = "/home/${mySecrets.user}";
+        description = "${mySecrets.user}";
         isNormalUser = true;
         group = "users";
         extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" ]; # wheel is for the sudo group
         uid = 1000;
         useDefaultShell = true;
-        password = "${myPwd}";
+        password = "${mySecrets.passwd}";
     };
 
     fonts = {
@@ -337,7 +341,7 @@ in
     };
 
     # Enable OpenVPN
-    services.openvpn.enable = true;
+#    services.openvpn.enable = true;
     services.openvpn.servers = {
         h-b = {
             config = ''
@@ -379,20 +383,21 @@ in
     };
 
     # Enable btsync
-    services.btsync = {
-        enable = true;
-        deviceName = "${myHostName}";
-        enableWebUI = true;
-        httpListenAddr = "127.0.0.1";
-        httpLogin = "${myUser}";
-        httpPass = "${myPwd}";
-    };
+#    services.btsync = {
+#        enable = true;
+#        deviceName = "${mySecrets.hostname}";
+#        enableWebUI = true;
+#        httpListenAddr = "127.0.0.1";
+#        httpListenPort = 9000;
+#        httpLogin = "${mySecrets.user}";
+#        httpPass = "${mySecrets.passwd}";
+#    };
     
     # Enable Syncthing
     services.syncthing = {
         enable = true;
         dataDir = "/home/hyper/Desktop/Syncthing";
-        user = "${myUser}";
+        user = "${mySecrets.user}";
     };
 
     # Enable Locate
@@ -423,18 +428,21 @@ in
         enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works 
     };
 
-    
     environment.systemPackages = with pkgs; [
         chromium
         cifs_utils
+        dcfldd # dd alternative that shows progress and can make different checksums on the fly
         filezilla
         firefoxWrapper
         ghostscript
         gimp
         git
         gnome.gtk
+        gnome3.geary
         gnupg
+        gparted
         htop
+        iftop
         imagemagick
         iotop
         jdk
@@ -443,6 +451,7 @@ in
 # KDE 4
         kde4.akonadi
         kde4.applications
+        kde4.k3b
 #       kde4.kactivities
         kde4.kdeadmin
 #       kde4.kdeartwork
@@ -468,9 +477,11 @@ in
         kde4.konversation
         kde4.kdemultimedia
         kde4.kdeplasma_addons
+        kde4.kdeutils
         kde4.networkmanagement
         kde4.oxygen_icons
-        kde4.kdeutils
+        kde4.print_manager
+        kde4.ktorrent
 # KDE 5
     #   kde5.ark
     #   kde5.kde-baseapps
@@ -493,21 +504,26 @@ in
         mc
         mplayer
         mumble
-#        mysql55
+        nmap
         nox     # Easy search for packages
-        openvpn
+        ntfs3g
+        opensc
         openssl
+        openvpn
         oxygen-gtk2
         oxygen-gtk3
+        parted
         pass
         pastebinit
+        pcsctools
         pdftk
 #       plasma-theme-oxygen
         php     # PHP-Cli
         pinentry
         psmisc
+        pwgen
         qt5Full
-        qt5SDK
+#        qt5SDK
         qtpass
         recode
         recoll
@@ -517,23 +533,30 @@ in
         skype
         sqlite
         stdenv # build-essential on nixos
+        steam
         sudo
 #       suisseid-pkcs11
         swt
+        syncthing
         sysfsutils
+        system_config_printer
         teamspeak_client
         thunderbird
         tmux
         unetbootin
         unoconv
+        unrar
         unzip
         vlc
         wget
         wine
-        (pkgs.callPackage ./suisseid-pkcs11.nix {})
-        (pkgs.callPackage ./swisssign-pin-entry.nix {})
+        winetricks
+        zip
+        (pkgs.callPackage ./pdfForts.nix {})
+#        (pkgs.callPackage ./localsigner.nix {})
+#        (pkgs.callPackage ./suisseid-pkcs11.nix {})
+#        (pkgs.callPackage ./swisssign-pin-entry.nix {})
 #       (pkgs.callPackage ./swisssigner.nix {})
-#       (pkgs.callPackage ./rssowl.nix {})
 #   ] ++ ( builtins.filter pkgs.stdenv.lib.isDerivation (builtins.attrValues kdeApps_stable));
     ];
 
