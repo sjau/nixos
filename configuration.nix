@@ -255,11 +255,18 @@ in
         user = "mysql";
         package = pkgs.mysql;
     };
-    
+
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
     nixpkgs.config.virtualbox.enableExtensionPack = true;
 
+#    nixpkgs.config = { 
+#        virtualbox.enableExtensionPack = true;
+#        packageOverrides = pkgs: rec { kde4.kdesdk_kioslaves = pkgs.stdenv.lib.overrideDerivation pkgs.kde4.kdesdk_kioslaves (oldAttrs: { buildInputs = with pkgs; [ kdelibs apr aprutil perl ]; }); };
+#    };
+
+    
+    
     # Enable Avahi for local domain resoltuion
     services.avahi = {
         enable = true;
@@ -337,6 +344,7 @@ in
             bakoma_ttf
             inconsolata
             gentium
+            ubuntu_font_family
         ];
     };
 
@@ -418,8 +426,13 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+        aspell
+        aspellDicts.de
+        aspellDicts.en
         chromium
         cifs_utils
+        coreutils
+        curl
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
         filezilla
         firefoxWrapper
@@ -467,8 +480,8 @@ in
         kde4.kdemultimedia
         kde4.kdeplasma_addons
         kde4.kdeutils
-        kde4.networkmanagement
         kde4.oxygen_icons
+        kde4.plasma-nm
         kde4.print_manager
         kde4.ktorrent
 # KDE 5
@@ -513,6 +526,7 @@ in
         pwgen
         qt5Full
 #        qt5SDK
+        qtcreator
         qtpass
         recode
         recoll
@@ -541,6 +555,7 @@ in
         wine
         winetricks
         zip
+        (pkgs.callPackage ./pastesl.nix {})
         (pkgs.callPackage ./pdfForts.nix {})
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
