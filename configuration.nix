@@ -426,6 +426,7 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+        androidsdk_4_4 # contains ADB
         aspell
         aspellDicts.de
         aspellDicts.en
@@ -436,6 +437,7 @@ in
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
         filezilla
         firefoxWrapper
+        gdb
         ghostscript
         gimp
         git
@@ -443,6 +445,7 @@ in
         gnome3.geary
         gnupg
         gparted
+        hdparm
         htop
         iftop
         imagemagick
@@ -522,6 +525,7 @@ in
 #       plasma-theme-oxygen
         php     # PHP-Cli
         pinentry
+        poppler_utils # provides command_not_found
         psmisc
         pwgen
         qt5Full
@@ -531,6 +535,7 @@ in
         recode
         recoll
 #       rssowl2
+        simplescreenrecorder
         smartmontools
         smplayer
         skype
@@ -544,6 +549,7 @@ in
         sysfsutils
         system_config_printer
         teamspeak_client
+        tesseract
         thunderbird
         tmux
         unetbootin
@@ -554,6 +560,7 @@ in
         wget
         wine
         winetricks
+        xpdf    # provides pdftotext
         zip
         (pkgs.callPackage ./pastesl.nix {})
         (pkgs.callPackage ./pdfForts.nix {})
