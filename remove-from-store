@@ -1,0 +1,5 @@
+nix-store --delete /nix/store/4mndxivxki26drrws741n581k5rfwvrd-nixos-16.03pre70277.3d0c064
+nix-store -q --roots /nix/store/4mndxivxki26drrws741n581k5rfwvrd-nixos-16.03pre70277.3d0c064
+rm /nix/var/nix/profiles/per-user/root/channels-1-link
+nix-store --delete /nix/store/4mndxivxki26drrws741n581k5rfwvrd-nixos-16.03pre70277.3d0c064
+

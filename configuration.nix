@@ -27,6 +27,15 @@ in
         ./hardware-configuration.nix
     ];
 
+#    boot.kernelPackages = pkgs.linuxPackages_custom {
+#        version = "4.3-rc5";
+#        src = pkgs.fetchurl {
+#            url = "https://cdn.kernel.org/pub/linux/kernel/v4.x/testing/linux-4.3-rc5.tar.xz";
+#            sha256 = "7951dee001cc69e1eb851ba57e851ee880ea07056af059581d25893e1ebb9aec";
+#        };
+#        configfile = /etc/nixos/customKernel.config;
+#    };
+
     # Use the GRUB 2 boot loader.
     boot.loader.grub.enable = true;
     boot.loader.grub.version = 2;
@@ -254,6 +263,11 @@ in
         rootPassword = "${mySecrets.passwd}";
         user = "mysql";
         package = pkgs.mysql;
+        extraOptions = ''
+            table_cache = 1600
+            log-error = /var/log/mysql_err.log
+            max_allowed_packet = 4M
+        '';
     };
 
     # Enable Virtualbox
@@ -437,6 +451,7 @@ in
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
         filezilla
         firefoxWrapper
+        gcc
         gdb
         ghostscript
         gimp
@@ -510,7 +525,10 @@ in
         mplayer
         mumble
         nmap
+        nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
         nox     # Easy search for packages
+        nss
+        nssTools
         ntfs3g
         opensc
         openssl
@@ -520,6 +538,7 @@ in
         parted
         pass
         pastebinit
+        pciutils
         pcsctools
         pdftk
 #       plasma-theme-oxygen
@@ -564,6 +583,8 @@ in
         zip
         (pkgs.callPackage ./pastesl.nix {})
         (pkgs.callPackage ./pdfForts.nix {})
+        (pkgs.callPackage ./quiterss.nix {})
+
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
 #        (pkgs.callPackage ./swisssign-pin-entry.nix {})
