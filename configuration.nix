@@ -45,6 +45,7 @@ in
     boot.initrd.luks.devices = [{
                             # device = "/dev/disk/by-label/nixos";
         name = "crypto_root"; device = "/dev/disk/by-uuid/c6cb0b53-6ad1-425c-8ef8-71730fec9ce6";
+        allowDiscards = true;
     }];
 
     hardware = {
