@@ -179,6 +179,9 @@ in
             176.31.121.75   kimsufi
         '';
     };
+    
+    # Make /etc/hosts writeable
+    environment.etc."hosts".mode = "0644";
 
     # Enable dbus
     services.dbus.enable = true;
@@ -305,6 +308,7 @@ in
     services.cron = {
         enable = true;
         systemCronJobs = [
+            "0 * * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
             "10 * * * * hyper nice php -f /var/www/html/e/abc_spider.php >/dev/null 2>&1"
@@ -459,6 +463,7 @@ in
         git
         gnome.gtk
         gnome3.geary
+        gnucash
         gnupg
         gparted
         hdparm
@@ -576,6 +581,7 @@ in
         unoconv
         unrar
         unzip
+        usbutils
         vlc
         wget
         wine
