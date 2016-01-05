@@ -451,11 +451,13 @@ in
         aspellDicts.en
         chromium
         cifs_utils
+        cdrtools
         coreutils
         curl
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
         filezilla
         firefoxWrapper
+        ffmpeg
         gcc
         gdb
         ghostscript
@@ -564,6 +566,7 @@ in
         smartmontools
         smplayer
         skype
+        sox
         sqlite
         stdenv # build-essential on nixos
         steam
