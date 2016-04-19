@@ -94,42 +94,43 @@ in
     fileSystems."/mnt/Audio" = {
         device = "//10.0.0.10/Audio";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
     };
     fileSystems."/mnt/Shows" = {
         device = "//10.0.0.10/Shows";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
     };
     fileSystems."/mnt/SJ" = {
         device = "//10.0.0.10/SJ";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
     };
     fileSystems."/mnt/Video" = {
         device = "//10.0.0.10/Video";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
     };
     fileSystems."/mnt/backup" = {
         device = "//10.0.0.10/backup";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
     };
     fileSystems."/mnt/eeePC" = {
         device = "//10.0.0.10/eeePC";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
     };
     fileSystems."/mnt/hyper" = {
         device = "//10.0.0.10/hyper";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
     };
     fileSystems."/mnt/jus-law" = {
         device = "//vpn-data.jus-law.ch/Advo";
         fsType = "cifs";
-        options = "noauto,user,uid=1000,gid=100,username=none,password=none,iocharset=utf8";
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" "x-systemd.requires=openvpn-j-l.service" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" ];
     };
 
 
@@ -227,7 +228,7 @@ in
         };
         desktopManager.kde4.enable = true;
         #desktopManager.kde5.enable = true;
-        startGnuPGAgent = true;
+        #startGnuPGAgent = true;
     };
     # Need to deactivate because of gpg agent
     programs.ssh.startAgent = false;
@@ -243,8 +244,7 @@ in
         extraConfig = ''
             <Directory /var/www/html>
                 DirectoryIndex index.php
-                Order deny,allow
-                Allow from *
+                Require all granted
             </Directory>
         '';
         # PHP
@@ -268,9 +268,8 @@ in
         user = "mysql";
         package = pkgs.mysql;
         extraOptions = ''
-            table_cache = 1600
-            log-error = /var/log/mysql_err.log
-            max_allowed_packet = 4M
+#            log_error = /var/mysql/mysql_err.log
+            max_allowed_packet = 64M
         '';
     };
 
@@ -290,7 +289,7 @@ in
         enable = true;
         hostName = "${mySecrets.hostname}";
         nssmdns = true;
-        publishing = true;
+#        publishing = true;
     };
 
     # Enable nscd
@@ -308,7 +307,7 @@ in
     services.cron = {
         enable = true;
         systemCronJobs = [
-            "0 * * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
+#            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
             "10 * * * * hyper nice php -f /var/www/html/e/abc_spider.php >/dev/null 2>&1"
@@ -379,7 +378,7 @@ in
             config = ''
                 config /root/.openvpn/j-l/client.conf
             '';
-            down = "umount /mnt/jus-law";
+#            down = "umount /mnt/jus-law";
         };
         ks = {
             config = ''
@@ -414,6 +413,14 @@ in
         enable = true;
         dataDir = "/home/hyper/Desktop/Syncthing";
         user = "${mySecrets.user}";
+    };
+
+    # Enable TOR
+    # use systemctl stop tor to turn it off
+    services.tor = {
+        enable = true;
+        client.enable = true;
+        controlPort = 9051;
     };
 
     # Enable Locate
@@ -455,6 +462,8 @@ in
         coreutils
         curl
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
+        ethtool
+        fatrace
         filezilla
         firefoxWrapper
         ffmpeg
@@ -470,8 +479,10 @@ in
         gparted
         hdparm
         htop
+        icedtea8_web
         iftop
         imagemagick
+        inkscape
         iotop
         jdk
         jre
@@ -530,8 +541,10 @@ in
         lightning
         lsof
         mc
+        monodevelop
         mplayer
         mumble
+        mupdf
         nmap
         nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
         nox     # Easy search for packages
@@ -570,9 +583,11 @@ in
         sqlite
         stdenv # build-essential on nixos
         steam
+        subversion
         sudo
 #       suisseid-pkcs11
         swt
+        sylpheed
         syncthing
         sysfsutils
         system_config_printer
@@ -587,6 +602,7 @@ in
         usbutils
         vlc
         wget
+        which
         wine
         winetricks
         xpdf    # provides pdftotext

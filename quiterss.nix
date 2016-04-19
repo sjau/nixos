@@ -2,16 +2,16 @@
 
 stdenv.mkDerivation rec {
   name = "QuiteRSS-${version}";
-  version = "0.18.2";
+  version = "0.18.4";
 
   sourceRoot = ".";
 
   src = fetchurl {
-    url = "http://quiterss.org/files/0.18.2/QuiteRSS-0.18.2-src.tar.gz";
-    sha256 = "d335529541d2824d66c941b68a34425929402d9c95716446a55ac0ceb777d18d";
+    url = "http://quiterss.org/files/0.18.4/QuiteRSS-0.18.4-src.tar.gz";
+    sha256 = "e53ddcab32ed4894ee59afd0db5d7ab86248986fdf6e1c1aeec9c8a841867a9c";
   };
 
-  buildInputs = [ qt5.base sqlite pkgconfig qt5.webkit qt5.multimedia qt5.tools ];
+  buildInputs = [ qt5.qtbase sqlite pkgconfig qt5.qtwebkit qt5.qtmultimedia qt5.qttools ];
   
   configurePhase = "qmake CONFIG+=release PREFIX=$out DESTDIR=$out QuiteRSS.pro";
 
