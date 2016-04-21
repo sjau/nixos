@@ -228,7 +228,7 @@ in
         };
         desktopManager.kde4.enable = true;
         #desktopManager.kde5.enable = true;
-        #startGnuPGAgent = true;
+        startGnuPGAgent = true;
     };
     # Need to deactivate because of gpg agent
     programs.ssh.startAgent = false;
