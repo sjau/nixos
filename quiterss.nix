@@ -11,10 +11,8 @@ stdenv.mkDerivation rec {
     sha256 = "e53ddcab32ed4894ee59afd0db5d7ab86248986fdf6e1c1aeec9c8a841867a9c";
   };
 
-  buildInputs = [ qt5.qtbase sqlite pkgconfig qt5.qtwebkit qt5.qtmultimedia qt5.qttools ];
+  buildInputs = [ qt5.qtbase sqlite pkgconfig qt5.qtwebkit qt5.qtmultimedia qt5.qttools qt5.qmakeHook ];
   
-  configurePhase = "qmake CONFIG+=release PREFIX=$out DESTDIR=$out QuiteRSS.pro";
-
   meta = with stdenv.lib; {
     description = "A multi-platform rss reader.";
     homepage = https://quiterss.org/;

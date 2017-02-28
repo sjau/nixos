@@ -2,8 +2,6 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-# All options for https://nixos.org/nixos/manual/ch-options.html
-
 { config, pkgs, ... }:
 
 let
@@ -12,6 +10,8 @@ let
     # This info is in a different file, so that the config can bit tracked by git without revealing sensitive infos. Feel free to expand
     mySecrets  = import /root/.nixos/mySecrets.nix;
 
+    pass = pkgs: pkgs.pass.override { gnupg = pkgs.gnupg; }; # or your gnupg version
+    
 
 in
     # Check if custom vars are set
@@ -20,45 +20,35 @@ in
     assert mySecrets.cifs       != "";
     assert mySecrets.hostname   != "";
 
-
 {
-    imports = [
-        # Include the results of the hardware scan.
-        ./hardware-configuration.nix
+imports =
+    [ # Include the results of the hardware scan.
+    ./hardware-configuration.nix
     ];
 
-#    boot.kernelPackages = pkgs.linuxPackages_custom {
-#        version = "4.3-rc5";
-#        src = pkgs.fetchurl {
-#            url = "https://cdn.kernel.org/pub/linux/kernel/v4.x/testing/linux-4.3-rc5.tar.xz";
-#            sha256 = "7951dee001cc69e1eb851ba57e851ee880ea07056af059581d25893e1ebb9aec";
-#        };
-#        configfile = /etc/nixos/customKernel.config;
-#    };
+# Use the GRUB 2 boot loader.
+boot.loader.grub.enable = true;
+boot.loader.grub.version = 2;
+# boot.loader.grub.efiSupport = true;
+# boot.loader.grub.efiInstallAsRemovable = true;
+# boot.loader.efi.efiSysMountPoint = "/boot/efi";
+# Define on which hard drive you want to install Grub.
+boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
-    # Use the GRUB 2 boot loader.
-    boot.loader.grub.enable = true;
-    boot.loader.grub.version = 2;
-    # Define on which hard drive you want to install Grub.
-    boot.loader.grub.device = "/dev/sda";
-
-    boot.initrd.luks.devices = [{
-                            # device = "/dev/disk/by-label/nixos";
-        name = "crypto_root"; device = "/dev/disk/by-uuid/c6cb0b53-6ad1-425c-8ef8-71730fec9ce6";
-        allowDiscards = true;
-    }];
+#LUKS Stuff in hardware-cofniguration.nix
 
     hardware = {
         # Hardware settings
         cpu.intel.updateMicrocode = true;
         enableAllFirmware = true;
         pulseaudio.enable = true;
-        #pulseaudio.systemWide = true;
         opengl.driSupport32Bit = true;  # Required for Steam
         pulseaudio.support32Bit = true; # Required for Steam
     };
 
+    
 /*
+    # One day I'll fix that... loops are better than listing everything...
     fileSystems = {
         "/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
         "/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
@@ -74,15 +64,15 @@ in
                 };
             };
         in builtins.listToAttrs (map makeFileSystems [
-               { name = "Audio"; }
-               { name = "Shows"; }
-               { name = "SJ"; }
-               { name = "Video"; }
-               { name = "backup"; }
-               { name = "hyper"; }
-               { name = "eeePC"; }
+            { name = "Audio"; }
+            { name = "Shows"; }
+            { name = "SJ"; }
+            { name = "Video"; }
+            { name = "backup"; }
+            { name = "hyper"; }
+            { name = "eeePC"; }
         ]));
-*/
+*/  
 
 
     fileSystems."/home/hyper/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
@@ -126,15 +116,17 @@ in
         fsType = "cifs";
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
     };
+    fileSystems."/mnt/rtorrent" = {
+        device = "//10.0.0.10/rtorrent";
+        fsType = "cifs";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+    };
     fileSystems."/mnt/jus-law" = {
         device = "//vpn-data.jus-law.ch/Advo";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" "x-systemd.requires=openvpn-j-l.service" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" ];
     };
-
-
-
 
     # Create some folders
     system.activationScripts.media = ''
@@ -145,12 +137,13 @@ in
         mkdir -m 0755 -p /mnt/backup
         mkdir -m 0755 -p /mnt/eeePC
         mkdir -m 0755 -p /mnt/hyper
+        mkdir -m 0755 -p /mnt/rtorrent
         mkdir -m 0755 -p /mnt/jus-law
     '';
 
 
     # Trust hydra. Needed for one-click installations.
-    #nix.trustedBinaryCaches = [ "http://hydra.nixos.org" ];
+    nix.trustedBinaryCaches = [ "http://hydra.nixos.org" ];
 
     # Setup networking
     networking = {
@@ -159,8 +152,8 @@ in
         #  enable = true;  # Enables wireless. Disable when using network manager
         networkmanager.enable = true;
         firewall.allowPing = true;
-        firewall.allowedUDPPorts = [ 21025 21026 22000 22026 ];
-        firewall.allowedTCPPorts = [ 22000 ];
+        firewall.allowedUDPPorts = [ 5000 21025 21026 22000 22026 ];
+        firewall.allowedTCPPorts = [ 5000 22000 ];
         # Syncthing: 21025 21026 22000 22026
         extraHosts = ''
             127.0.0.1       ivwbox.de
@@ -180,7 +173,8 @@ in
             176.31.121.75   kimsufi
         '';
     };
-    
+
+
     # Make /etc/hosts writeable
     environment.etc."hosts".mode = "0644";
 
@@ -194,6 +188,13 @@ in
         defaultLocale = "en_US.UTF-8";
     };
 
+# List packages installed in system profile. To search by name, run:
+# $ nix-env -qaP | grep wget
+# environment.systemPackages = with pkgs; [
+#   wget
+# ];
+
+# List services that you want to enable:
 
     # Enable the OpenSSH daemon.
     services.openssh = {
@@ -201,11 +202,13 @@ in
         permitRootLogin = "yes";
     };
 
+
     # Enable CUPS to print documents.
     services.printing = {
         enable = true;
         drivers = [ pkgs.gutenprint pkgs.hplip ];
     };
+
 
     # Enable the X11 windowing system.
     services.xserver = {
@@ -217,32 +220,27 @@ in
         };
 
         # Enable the KDE Desktop Environment.
-        displayManager.kdm = {
+        displayManager.sddm = {
             enable = true;
-            extraConfig = ''
-                [X-:0-Core]
-                AutoLoginEnable=true
-                AutoLoginUser=hyper
-                AutoLoginPass=${mySecrets.passwd}
-            '';
+            autoLogin = {
+                enable = true;
+                user = "hyper";
+            };
         };
-        desktopManager.kde4.enable = true;
-        #desktopManager.kde5.enable = true;
-        startGnuPGAgent = true;
+        desktopManager.kde5.enable = true;
     };
-    # Need to deactivate because of gpg agent
-    programs.ssh.startAgent = false;
+
 
     # Enable apache
     services.httpd = {
         enable = true;
-        documentRoot = "/var/www/html";
+        documentRoot = "/var/www/web";
         adminAddr = "admin@localhost";
         extraModules = [{
             name = "php5"; path = "${pkgs.php}/modules/libphp5.so";
         }];
         extraConfig = ''
-            <Directory /var/www/html>
+            <Directory /var/www/web>
                 DirectoryIndex index.php
                 Require all granted
             </Directory>
@@ -259,6 +257,7 @@ in
             date.timezone = "CET"
         '';
     };
+    
 
     # Enable mysql
     services.mysql = {
@@ -271,66 +270,69 @@ in
 #            log_error = /var/mysql/mysql_err.log
             max_allowed_packet = 64M
         '';
-    };
+    };   
+
 
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
+    boot.kernelPackages = pkgs.linuxPackages // {
+        virtualbox = pkgs.linuxPackages.virtualbox.override {
+            enableExtensionPack = true;
+            pulseSupport = true;
+        };
+    };
     nixpkgs.config.virtualbox.enableExtensionPack = true;
 
-#    nixpkgs.config = { 
-#        virtualbox.enableExtensionPack = true;
-#        packageOverrides = pkgs: rec { kde4.kdesdk_kioslaves = pkgs.stdenv.lib.overrideDerivation pkgs.kde4.kdesdk_kioslaves (oldAttrs: { buildInputs = with pkgs; [ kdelibs apr aprutil perl ]; }); };
-#    };
 
-    
-    
     # Enable Avahi for local domain resoltuion
     services.avahi = {
         enable = true;
         hostName = "${mySecrets.hostname}";
         nssmdns = true;
-#        publishing = true;
     };
+
 
     # Enable nscd
     services.nscd = {
         enable = true;
     };
 
-    # Enable ntp
-    services.ntp = {
+    # Enable ntp or rather timesyncd
+    services.timesyncd = {
         enable = true;
         servers = [ "0.ch.pool.ntp.org" "1.ch.pool.ntp.org" "2.ch.pool.ntp.org" "3.ch.pool.ntp.org" ];
     };
+
 
     # Enable cron
     services.cron = {
         enable = true;
         systemCronJobs = [
-#            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
+            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
-            "10 * * * * hyper nice php -f /var/www/html/e/abc_spider.php >/dev/null 2>&1"
-            "25 * * * * hyper nice php -f /var/www/html/e/ei_spider.php >/dev/null 2>&1"
-            "40 * * * * hyper nice php -f /var/www/html/e/news_spider.php >/dev/null 2>&1"
-            "55 * * * * hyper nice php -f /var/www/html/e/si_spider.php >/dev/null 2>&1"
         ];
     };
-   
+
+
     # Enable Syslog
     #services.syslogd = {
     #    enable = true;
     #    tty = "9";
     #};
-        
+
+
     # Setuid
-    security.setuidPrograms = [ "mount.cifs" ];
+    security.wrappers."mount.cifs".source = "${pkgs.cifs-utils}/bin/mount.cifs";
+    security.wrappers."cdrecord".source = "${pkgs.cdrtools}/bin/cdrecord";
+
 
     # Enable sudo
     security.sudo = {
         enable = true;
         wheelNeedsPassword = true;
     };
+
 
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users.defaultUserShell = "/var/run/current-system/sw/bin/bash";
@@ -340,11 +342,12 @@ in
         description = "${mySecrets.user}";
         isNormalUser = true;
         group = "users";
-        extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" ]; # wheel is for the sudo group
+        extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" "cdrom" ]; # wheel is for the sudo group
         uid = 1000;
         useDefaultShell = true;
         password = "${mySecrets.passwd}";
     };
+
 
     fonts = {
         enableFontDir = true;
@@ -366,8 +369,8 @@ in
         ];
     };
 
+
     # Enable OpenVPN
-#    services.openvpn.enable = true;
     services.openvpn.servers = {
         h-b = {
             config = ''
@@ -397,16 +400,19 @@ in
         };
     };
 
+
     # Enable smartmon daemon
     services.smartd = {
         enable = true;
         devices = [ { device = "/dev/sda"; } ];
     };
 
+
     # Enable smartcard daemon
     services.pcscd = {
         enable = true;
     };
+
 
     # Enable Syncthing
     services.syncthing = {
@@ -414,6 +420,7 @@ in
         dataDir = "/home/hyper/Desktop/Syncthing";
         user = "${mySecrets.user}";
     };
+
 
     # Enable TOR
     # use systemctl stop tor to turn it off
@@ -423,14 +430,18 @@ in
         controlPort = 9051;
     };
 
+
     # Enable Locate
     services.locate.enable = true;
+
 
     # Time.
     time.timeZone = "Europe/Zurich";
 
+
     # Add the NixOS Manual on virtual console 8
     services.nixosManual.showManual = true;
+
 
     # Setup nano
     programs.nano.nanorc = ''
@@ -440,6 +451,7 @@ in
         set const
         # include /usr/share/nano/sh.nanorc
     '';
+
 
     # List packages installed in system profile. To search by name, run:
     # $ nix-env -qaP | grep wget
@@ -451,11 +463,26 @@ in
         enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works 
     };
 
+
+    # The NixOS release to be compatible with for stateful data such as databases.
+    system.stateVersion = "16.09";
+
+
+    # Use KDE5 unstable
+    nixpkgs.config = {
+        packageOverrides = super: let self = super.pkgs; in {
+            plasma5_stable = self.plasma5_latest;
+            kdeApps_stable = self.kdeApps_latest;
+        };
+    };
+
+    # List of packages that gets installed....
     environment.systemPackages = with pkgs; [
         androidsdk_4_4 # contains ADB
         aspell
         aspellDicts.de
         aspellDicts.en
+        audacity
         chromium
         cifs_utils
         cdrtools
@@ -463,88 +490,69 @@ in
         curl
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
         ethtool
+        exfat
         fatrace
         filezilla
         firefoxWrapper
         ffmpeg
+        foo2zjs			# Printer drivers for Oki -> http://foo2hiperc.rkkda.com/
+        foomatic-filters
         gcc
         gdb
         ghostscript
         gimp
         git
-        gnome.gtk
-        gnome3.geary
+        gksu
         gnucash
-        gnupg
+        gnupg		# GnuPG 2 -> provides gpg2 binary
         gparted
         hdparm
         htop
         icedtea8_web
         iftop
         imagemagick
+        inetutils
         inkscape
         iotop
         jdk
+        jq
         jre
         jwhois
 # KDE 4
-        kde4.akonadi
-        kde4.applications
         kde4.k3b
-#       kde4.kactivities
-        kde4.kdeadmin
-#       kde4.kdeartwork
-        kde4.kdeaccessibility
-        kde4.kdebase_workspace
-        kde4.kdebindings
-#       kde4.kdeedu
-        kde4.kdegames
-        kde4.kdegraphics
-        kde4.kdelibs
-        kde4.kdenetwork
-        kde4.kdepim
-        kde4.kdepim_runtime
-        kde4.kdepimlibs
-        kde4.kdesdk
-#       kde4.kdetoys
-        kde4.kdevelop
-        kde4.kdevplatform
-        kde4.kdewebdev
-        kde4.kde_baseapps
-        kde4.kde_base_artwork
-        kde4.kde_wallpapers
         kde4.konversation
-        kde4.kdemultimedia
-        kde4.kdeplasma_addons
-        kde4.kdeutils
-        kde4.oxygen_icons
-        kde4.plasma-nm
-        kde4.print_manager
-        kde4.ktorrent
+        kde4.ksnapshot
 # KDE 5
-    #   kde5.ark
-    #   kde5.kde-baseapps
-    #   kde5.kate
-    #   kde5.kdepim
-    #   kde5.kdepimlibs
-    #   kde5.kdepim-runtime
+        kde5.ark
+        kde5.dolphin
+        kdevelop
+        kde5.kate
+    #    konversation
     #   kde5.ksnapshot
-    #   kde5.kwallet
-    #   kde5.okular
-    #   kde5.oxygen
-    #   kde5.oxygen-fonts
-    #   kde5.oxygen-icons
-    #   kde5.plasma-desktop
-    #   kde5.plasma-nm
-    #   kde5.plasma-workspace
+        ktorrent
+        kde5.kwallet
+        kde5.okular
+        kde5.oxygen
+        kde5.oxygen-icons5
+        oxygen-gtk2
+        oxygen-gtk3
+        oxygenfonts
+        kde5.plasma-desktop
+        kde5.plasma-nm
+        kde5.plasma-workspace
         libreoffice
         lightning
+        links
         lsof
         mc
+        mktorrent
         monodevelop
         mplayer
+        mpv
+        ms-sys
         mumble
         mupdf
+        netcat-gnu
         nmap
         nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
         nox     # Easy search for packages
@@ -557,24 +565,26 @@ in
         oxygen-gtk2
         oxygen-gtk3
         parted
-        pass
+        (pass pkgs)
         pastebinit
+        pavucontrol
         pciutils
         pcsctools
         pdftk
-#       plasma-theme-oxygen
+        pgadmin
         php     # PHP-Cli
         pinentry
+        pinentry_qt4
+        playonlinux
         poppler_utils # provides command_not_found
+        python27Packages.youtube-dl
         psmisc
         pwgen
         qt5Full
-#        qt5SDK
         qtcreator
         qtpass
         recode
         recoll
-#       rssowl2
         simplescreenrecorder
         smartmontools
         smplayer
@@ -582,7 +592,7 @@ in
         sox
         sqlite
         stdenv # build-essential on nixos
-        steam
+#        steam
         subversion
         sudo
 #       suisseid-pkcs11
@@ -608,7 +618,7 @@ in
         xpdf    # provides pdftotext
         zip
         (pkgs.callPackage ./pastesl.nix {})
-        (pkgs.callPackage ./pdfForts.nix {})
+#        (pkgs.callPackage ./pdfForts.nix {})
         (pkgs.callPackage ./quiterss.nix {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
