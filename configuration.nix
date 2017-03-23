@@ -15,10 +15,11 @@ let
 
 in
     # Check if custom vars are set
-    assert mySecrets.user       != "";
-    assert mySecrets.passwd     != "";
-    assert mySecrets.cifs       != "";
-    assert mySecrets.hostname   != "";
+    assert mySecrets.user           != "";
+    assert mySecrets.passwd         != "";
+    assert mySecrets.hashedpasswd   != "";
+    assert mySecrets.cifs           != "";
+    assert mySecrets.hostname       != "";
 
 {
 imports =
@@ -84,42 +85,50 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     fileSystems."/mnt/Audio" = {
         device = "//10.0.0.10/Audio";
         fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/Shows" = {
         device = "//10.0.0.10/Shows";
         fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/SJ" = {
         device = "//10.0.0.10/SJ";
         fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/Video" = {
         device = "//10.0.0.10/Video";
         fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/backup" = {
         device = "//10.0.0.10/backup";
         fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/eeePC" = {
         device = "//10.0.0.10/eeePC";
         fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/hyper" = {
         device = "//10.0.0.10/hyper";
         fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/rtorrent" = {
         device = "//10.0.0.10/rtorrent";
         fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/jus-law" = {
         device = "//vpn-data.jus-law.ch/Advo";
@@ -227,7 +236,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
                 user = "hyper";
             };
         };
-        desktopManager.kde5.enable = true;
+        desktopManager.plasma5.enable = true;
     };
 
 
@@ -325,6 +334,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     # Setuid
     security.wrappers."mount.cifs".source = "${pkgs.cifs-utils}/bin/mount.cifs";
     security.wrappers."cdrecord".source = "${pkgs.cdrtools}/bin/cdrecord";
+#    security.wrappers."virtualbox".source = "${pkgs.virtualbox}/bin/VirtualBox";   -->  doesn't fix this  https://github.com/NixOS/nixpkgs/issues/5283#issuecomment-282825564
 
 
     # Enable sudo
@@ -337,15 +347,11 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users.defaultUserShell = "/var/run/current-system/sw/bin/bash";
     users.extraUsers.${mySecrets.user} = {
-        createHome = true;
-        home = "/home/${mySecrets.user}";
+        isNormalUser = true;    # creates home, adds to group users, sets default shell
         description = "${mySecrets.user}";
-        isNormalUser = true;
-        group = "users";
         extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" "cdrom" ]; # wheel is for the sudo group
         uid = 1000;
-        useDefaultShell = true;
-        password = "${mySecrets.passwd}";
+        initialHashedPassword = "${mySecrets.hashedpasswd}";
     };
 
 
@@ -469,11 +475,9 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
 
     # Use KDE5 unstable
-    nixpkgs.config = {
-        packageOverrides = super: let self = super.pkgs; in {
-            plasma5_stable = self.plasma5_latest;
-            kdeApps_stable = self.kdeApps_latest;
-        };
+    nixpkgs.config.packageOverrides = super: let self = super.pkgs; in {
+        plasma5_stable = self.plasma5_latest;
+        kdeApps_stable = self.kdeApps_latest;
     };
 
     # List of packages that gets installed....
@@ -484,6 +488,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         aspellDicts.en
         audacity
         chromium
+        chromiumBeta
+#        chromiumDev
         cifs_utils
         cdrtools
         coreutils
@@ -518,33 +524,30 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         jq
         jre
         jwhois
-# KDE 4
-        kde4.k3b
-        kde4.konversation
-        kde4.ksnapshot
 # KDE 5
-        kde5.ark
-        kde5.dolphin
+        ark
+        dolphin
         kdevelop
-        kde5.kate
-    #    konversation
-    #   kde5.ksnapshot
+        k3b
+        kate
+        konversation
+    #   ksnapshot
         ktorrent
-        kde5.kwallet
-        kde5.okular
-        kde5.oxygen
-        kde5.oxygen-icons5
-        oxygen-gtk2
-        oxygen-gtk3
+        lxqt.lximage-qt
+        okular
+        oxygen
+        oxygen-icons5
         oxygenfonts
-        kde5.plasma-desktop
-        kde5.plasma-nm
-        kde5.plasma-workspace
+        plasma-desktop
+        plasma-nm
+        plasma-workspace
+# End of KDE 5
         libreoffice
         lightning
         links
         lsof
         mc
+        mkpasswd
         mktorrent
         monodevelop
         mplayer
@@ -562,8 +565,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         opensc
         openssl
         openvpn
-        oxygen-gtk2
-        oxygen-gtk3
         parted
         (pass pkgs)
         pastebinit
