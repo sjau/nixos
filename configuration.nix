@@ -291,6 +291,12 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         };
     };
     nixpkgs.config.virtualbox.enableExtensionPack = true;
+    
+    # Enable KVM/Qemu
+    virtualisation.libvirtd = {
+        enable = true;
+        enableKVM = true;
+    };
 
 
     # Enable Avahi for local domain resoltuion
@@ -324,13 +330,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     };
 
 
-    # Enable Syslog
-    #services.syslogd = {
-    #    enable = true;
-    #    tty = "9";
-    #};
-
-
     # Setuid
     security.wrappers."mount.cifs".source = "${pkgs.cifs-utils}/bin/mount.cifs";
     security.wrappers."cdrecord".source = "${pkgs.cdrtools}/bin/cdrecord";
@@ -349,7 +348,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     users.extraUsers.${mySecrets.user} = {
         isNormalUser = true;    # creates home, adds to group users, sets default shell
         description = "${mySecrets.user}";
-        extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" "cdrom" ]; # wheel is for the sudo group
+        extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" "cdrom" "kvm" ]; # wheel is for the sudo group
         uid = 1000;
         initialHashedPassword = "${mySecrets.hashedpasswd}";
     };
@@ -471,7 +470,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
 
     # The NixOS release to be compatible with for stateful data such as databases.
-    system.stateVersion = "16.09";
+    system.stateVersion = "17.03";
 
 
     # Use KDE5 unstable
@@ -482,13 +481,13 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     # List of packages that gets installed....
     environment.systemPackages = with pkgs; [
-        androidsdk_4_4 # contains ADB
+#        androidsdk_4_4 # contains ADB
         aspell
         aspellDicts.de
         aspellDicts.en
         audacity
         chromium
-        chromiumBeta
+#        chromiumBeta
 #        chromiumDev
         cifs_utils
         cdrtools
@@ -519,6 +518,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         imagemagick
         inetutils
         inkscape
+        iosevka
         iotop
         jdk
         jq
@@ -533,6 +533,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         konversation
     #   ksnapshot
         ktorrent
+        kvm
         lxqt.lximage-qt
         okular
         oxygen
@@ -611,6 +612,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         unrar
         unzip
         usbutils
+        virtmanager
+        virtmanager-qt
         vlc
         wget
         which

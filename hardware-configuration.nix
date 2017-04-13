@@ -8,30 +8,31 @@
     [ <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ehci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "ehci_pci" "ahci" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
+  boot.kernelModules = [ "kvm-intel" "tun" "virtio" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/7c95253b-853f-45ad-97bc-4f2d99be980c";
+    { device = "/dev/disk/by-uuid/c0a0a237-c943-41bd-b3e2-d6b98fdbc58f";
       fsType = "ext4";
       options = [ "discard" "noatime" "nodiratime" ];
     };
 
-# boot.initrd.luks.devices."crypto_root".device = "/dev/disk/by-uuid/6140c115-62f8-42d9-93a9-f4b53c2696eb";
+#  boot.initrd.luks.devices."sda".device = "/dev/disk/by-uuid/4f4d55a9-3b6b-42f0-b51d-f95ffea6d10a";
 
   boot.initrd.luks.devices = [{
       name = "crypto_root";
-      device = "/dev/disk/by-uuid/6140c115-62f8-42d9-93a9-f4b53c2696eb";
+      device = "/dev/disk/by-uuid/4f4d55a9-3b6b-42f0-b51d-f95ffea6d10a";
       allowDiscards = true;
   }];
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/3be56ac4-bf41-4642-8c10-ec10e99e4b10";
+    { device = "/dev/disk/by-uuid/a6895647-296f-4ee0-90ad-3e0881de6168";
       fsType = "ext4";
     };
 
   swapDevices = [ ];
 
   nix.maxJobs = lib.mkDefault 4;
+  powerManagement.cpuFreqGovernor = "powersave";
 }
