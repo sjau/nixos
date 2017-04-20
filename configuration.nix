@@ -481,7 +481,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     # List of packages that gets installed....
     environment.systemPackages = with pkgs; [
-#        androidsdk_4_4 # contains ADB
+        androidsdk_4_4 # contains ADB
         aspell
         aspellDicts.de
         aspellDicts.en
@@ -516,20 +516,21 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         icedtea8_web
         iftop
         imagemagick
-        inetutils
+#        inetutils  # problems with whois, so use iputils and whois instead
         inkscape
         iosevka
         iotop
+        iputils
         jdk
         jq
         jre
-        jwhois
 # KDE 5
         ark
         dolphin
         kdevelop
         k3b
         kate
+        kcalc
         konversation
     #   ksnapshot
         ktorrent
@@ -617,6 +618,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         vlc
         wget
         which
+        whois
         wine
         winetricks
         xpdf    # provides pdftotext
