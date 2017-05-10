@@ -246,7 +246,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         documentRoot = "/var/www/web";
         adminAddr = "admin@localhost";
         extraModules = [{
-            name = "php5"; path = "${pkgs.php}/modules/libphp5.so";
+            name = "php7";
+            path = "${pkgs.php}/modules/libphp7.so";
         }];
         extraConfig = ''
             <Directory /var/www/web>
@@ -508,9 +509,10 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         gimp
         git
         gksu
-        gnucash
+#        gnucash
         gnupg		# GnuPG 2 -> provides gpg2 binary
         gparted
+        gwenview
         hdparm
         htop
         icedtea8_web
@@ -621,6 +623,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         whois
         wine
         winetricks
+        wireshark
         xpdf    # provides pdftotext
         zip
         (pkgs.callPackage ./pastesl.nix {})
