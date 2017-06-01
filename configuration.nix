@@ -20,6 +20,8 @@ in
     assert mySecrets.hashedpasswd   != "";
     assert mySecrets.cifs           != "";
     assert mySecrets.hostname       != "";
+    assert mySecrets.smbhome        != "";
+    assert mySecrets.smboffice      != "";
 
 {
 imports =
@@ -59,7 +61,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             makeFileSystems = { name }: {
                 inherit name;
                 value = {
-                    device = "//10.0.0.10/${name}";
+                    device = "//${mySecrets.smbhome}/${name}";
                     fsType = "cifs";
                     options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
                 };
@@ -83,55 +85,55 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     # CIFS
     fileSystems."/mnt/Audio" = {
-        device = "//10.0.0.10/Audio";
+        device = "//${mySecrets.smbhome}/Audio";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/Shows" = {
-        device = "//10.0.0.10/Shows";
+        device = "//${mySecrets.smbhome}/Shows";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/SJ" = {
-        device = "//10.0.0.10/SJ";
+        device = "//${mySecrets.smbhome}/SJ";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/Video" = {
-        device = "//10.0.0.10/Video";
+        device = "//${mySecrets.smbhome}/Video";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/backup" = {
-        device = "//10.0.0.10/backup";
+        device = "//${mySecrets.smbhome}/backup";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/eeePC" = {
-        device = "//10.0.0.10/eeePC";
+        device = "//${mySecrets.smbhome}/eeePC";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/hyper" = {
-        device = "//10.0.0.10/hyper";
+        device = "//${mySecrets.smbhome}/hyper";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/rtorrent" = {
-        device = "//10.0.0.10/rtorrent";
+        device = "//${mySecrets.smbhome}/rtorrent";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/jus-law" = {
-        device = "//vpn-data.jus-law.ch/Advo";
+        device = "//${mySecrets.smboffice}/Advo";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" "x-systemd.requires=openvpn-j-l.service" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" ];
@@ -168,6 +170,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             127.0.0.1       ivwbox.de
             127.0.0.1       *.ivwbox.de
             127.0.0.1       *.webtrendslive.ch
+            127.0.0.1       hyrekilo.club
 
             188.40.139.2    ns99
             10.8.0.8        ns
@@ -294,10 +297,10 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     nixpkgs.config.virtualbox.enableExtensionPack = true;
     
     # Enable KVM/Qemu
-    virtualisation.libvirtd = {
-        enable = true;
-        enableKVM = true;
-    };
+#    virtualisation.libvirtd = {
+#        enable = true;
+#        enableKVM = true;
+#    };
 
 
     # Enable Avahi for local domain resoltuion
@@ -327,6 +330,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
+            "30 * * * * hyper pass git pull"
+            "40 * * * * hyper pass git push"
         ];
     };
 
@@ -378,7 +383,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     # Enable OpenVPN
     services.openvpn.servers = {
-        h-b = {
+        h-b = { 
             config = ''
                 config /root/.openvpn/h-b/SJ.conf
             '';
@@ -471,7 +476,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
 
     # The NixOS release to be compatible with for stateful data such as databases.
-    system.stateVersion = "17.03";
+    system.stateVersion = "17.09";
 
 
     # Use KDE5 unstable
@@ -590,11 +595,11 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         qtpass
         recode
         recoll
-        simplescreenrecorder
         smartmontools
         smplayer
         skype
         sox
+        spectacle # KSnapShot replacement for KDE 5
         sqlite
         stdenv # build-essential on nixos
 #        steam
@@ -615,8 +620,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         unrar
         unzip
         usbutils
-        virtmanager
-        virtmanager-qt
+#        virtmanager
+#        virtmanager-qt
         vlc
         wget
         which
