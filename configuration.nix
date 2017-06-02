@@ -78,7 +78,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 */  
 
 
-    fileSystems."/home/hyper/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
+    fileSystems."/home/${mySecrets.user}/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
     fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
     fileSystems."/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
     fileSystems."/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
@@ -88,49 +88,49 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         device = "//${mySecrets.smbhome}/Audio";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/Shows" = {
         device = "//${mySecrets.smbhome}/Shows";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/SJ" = {
         device = "//${mySecrets.smbhome}/SJ";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/Video" = {
         device = "//${mySecrets.smbhome}/Video";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/backup" = {
         device = "//${mySecrets.smbhome}/backup";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/eeePC" = {
         device = "//${mySecrets.smbhome}/eeePC";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/hyper" = {
         device = "//${mySecrets.smbhome}/hyper";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/rtorrent" = {
         device = "//${mySecrets.smbhome}/rtorrent";
         fsType = "cifs";
 #        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/jus-law" = {
         device = "//${mySecrets.smboffice}/Advo";
@@ -236,7 +236,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             enable = true;
             autoLogin = {
                 enable = true;
-                user = "hyper";
+                user = "${mySecrets.user}";
             };
         };
         desktopManager.plasma5.enable = true;
@@ -330,8 +330,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
-            "30 * * * * hyper pass git pull"
-            "40 * * * * hyper pass git push"
+            "30 * * * * ${mySecrets.user} pass git pull"
+            "40 * * * * ${mySecrets.user} pass git push"
         ];
     };
 
@@ -428,7 +428,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     # Enable Syncthing
     services.syncthing = {
         enable = true;
-        dataDir = "/home/hyper/Desktop/Syncthing";
+        dataDir = "/home/${mySecrets.user}/Desktop/Syncthing";
         user = "${mySecrets.user}";
     };
 
@@ -646,6 +646,5 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 # fontconfig fontconfig-config fonts-dejavu-core libaudio2 libccid libfontconfig1 libice6 libjbig0 libjpeg-turbo8 libjpeg8 libqt-declarative
 # libqt4-network libqt4-script libqt4-sql libqt4-xml libqt4-xmlpatterns libqt4core4 libqtdbus4 libqtgui4 libsm6 libtiff5 libxi6 libxrender1
 # libxt6 pcscd qtcore4-l10n suisseid-pkcs11 swisssign-pin-entry x11-common
-
 
 }
