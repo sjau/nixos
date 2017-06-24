@@ -80,7 +80,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     fileSystems."/home/${mySecrets.user}/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
     fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
-    fileSystems."/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
+#    fileSystems."/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };  # No need to not keep log files nowadays even on SSD to prevent level wear.
     fileSystems."/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
 
     # CIFS
@@ -487,11 +487,12 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     # List of packages that gets installed....
     environment.systemPackages = with pkgs; [
-        androidsdk_4_4 # contains ADB
+        androidsdk # contains ADB
         aspell
         aspellDicts.de
         aspellDicts.en
         audacity
+        bash-completion
         chromium
 #        chromiumBeta
 #        chromiumDev
@@ -534,6 +535,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 # KDE 5
         ark
         dolphin
+        kdeFrameworks.kdesu
         kdevelop
         k3b
         kate
