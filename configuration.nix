@@ -87,56 +87,47 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     fileSystems."/mnt/Audio" = {
         device = "//${mySecrets.smbhome}/Audio";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/Shows" = {
         device = "//${mySecrets.smbhome}/Shows";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/SJ" = {
         device = "//${mySecrets.smbhome}/SJ";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/Video" = {
         device = "//${mySecrets.smbhome}/Video";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/backup" = {
         device = "//${mySecrets.smbhome}/backup";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/eeePC" = {
         device = "//${mySecrets.smbhome}/eeePC";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/hyper" = {
         device = "//${mySecrets.smbhome}/hyper";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/rtorrent" = {
         device = "//${mySecrets.smbhome}/rtorrent";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=hyper" "password=${mySecrets.cifs}" "iocharset=utf8" "sec=ntlm" ];
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
     };
     fileSystems."/mnt/jus-law" = {
         device = "//${mySecrets.smboffice}/Advo";
         fsType = "cifs";
-#        options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" "x-systemd.requires=openvpn-j-l.service" ];
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" ];
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" "x-systemd.requires=openvpn-j-l.service" ];
     };
 
     # Create some folders
@@ -614,6 +605,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         sysfsutils
         system_config_printer
         teamspeak_client
+        teamviewer
         tesseract
         thunderbird
         tmux
