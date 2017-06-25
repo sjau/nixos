@@ -11,7 +11,6 @@ let
     mySecrets  = import /root/.nixos/mySecrets.nix;
 
     pass = pkgs: pkgs.pass.override { gnupg = pkgs.gnupg; }; # or your gnupg version
-    
 
 in
     # Check if custom vars are set
@@ -32,9 +31,6 @@ imports =
 # Use the GRUB 2 boot loader.
 boot.loader.grub.enable = true;
 boot.loader.grub.version = 2;
-# boot.loader.grub.efiSupport = true;
-# boot.loader.grub.efiInstallAsRemovable = true;
-# boot.loader.efi.efiSysMountPoint = "/boot/efi";
 # Define on which hard drive you want to install Grub.
 boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
@@ -80,7 +76,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     fileSystems."/home/${mySecrets.user}/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
     fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
-#    fileSystems."/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };  # No need to not keep log files nowadays even on SSD to prevent level wear.
     fileSystems."/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
 
     # CIFS
@@ -191,11 +186,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         defaultLocale = "en_US.UTF-8";
     };
 
-# List packages installed in system profile. To search by name, run:
-# $ nix-env -qaP | grep wget
-# environment.systemPackages = with pkgs; [
-#   wget
-# ];
 
 # List services that you want to enable:
 
@@ -330,7 +320,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     # Setuid
     security.wrappers."mount.cifs".source = "${pkgs.cifs-utils}/bin/mount.cifs";
     security.wrappers."cdrecord".source = "${pkgs.cdrtools}/bin/cdrecord";
-#    security.wrappers."virtualbox".source = "${pkgs.virtualbox}/bin/VirtualBox";   -->  doesn't fix this  https://github.com/NixOS/nixpkgs/issues/5283#issuecomment-282825564
 
 
     # Enable sudo
@@ -383,7 +372,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             config = ''
                 config /root/.openvpn/j-l/client.conf
             '';
-#            down = "umount /mnt/jus-law";
         };
         ks = {
             config = ''
@@ -425,7 +413,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
 
     # Enable TOR
-    # use systemctl stop tor to turn it off
     services.tor = {
         enable = true;
         client.enable = true;
@@ -455,26 +442,27 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     '';
 
 
-    # List packages installed in system profile. To search by name, run:
-    # $ nix-env -qaP | grep wget
-    nixpkgs.config.allowUnfree = true;
-    #nixpkgs.config.firefox = {
-    #        enableAdobeFlash = true;
-    #};
-    nixpkgs.config.chromium = {
-        enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works 
-    };
+# List packages installed in system profile. To search by name, run:
+# $ nix-env -qaP | grep wget
+# environment.systemPackages = with pkgs; [
+#   wget
+# ];
 
 
     # The NixOS release to be compatible with for stateful data such as databases.
     system.stateVersion = "17.09";
 
+    nixpkgs.config.allowUnfree = true;
+    nixpkgs.config.chromium = {
+        enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works 
+    };
 
     # Use KDE5 unstable
     nixpkgs.config.packageOverrides = super: let self = super.pkgs; in {
         plasma5_stable = self.plasma5_latest;
         kdeApps_stable = self.kdeApps_latest;
     };
+
 
     # List of packages that gets installed....
     environment.systemPackages = with pkgs; [
