@@ -520,7 +520,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         kate
         kcalc
         konversation
-    #   ksnapshot
         ktorrent
         kvm
         lxqt.lximage-qt
@@ -574,6 +573,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         qt5Full
         qtcreator
         qtpass
+        quiterss
         recode
         recoll
         smartmontools
@@ -615,7 +615,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         zip
         (pkgs.callPackage ./pastesl.nix {})
 #        (pkgs.callPackage ./pdfForts.nix {})
-        (pkgs.callPackage ./quiterss.nix {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
