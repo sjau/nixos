@@ -170,9 +170,10 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             127.0.0.1       hyrekilo.club
 
             # Get ad server list from: https://pgl.yoyo.org/adservers/serverlist.php?showintro=0;hostformat=hosts 
-            # and store it as /etc/nixos/adservers.txt
-            # curl -o /etc/nixos/adservers.txt https://pgl.yoyo.org/adservers/serverlist.php?showintro=0;hostformat=hosts 
-            ${builtins.readFile ./adservers.txt }
+            # and store it as /etc/nixos/adservers.txt and uncomment the next line OR
+            #${builtins.readFile ./adservers.txt }
+            # use the following expression to fetch latest list upon building
+            ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "https://pgl.yoyo.org/adservers/serverlist.php?showintro=0;hostformat=hosts"; })}
         '';
     };
 
