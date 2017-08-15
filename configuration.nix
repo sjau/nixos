@@ -153,11 +153,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         firewall.allowedTCPPorts = [ 5000 22000 ];
         # Syncthing: 21025 21026 22000 22026
         extraHosts = ''
-            127.0.0.1       ivwbox.de
-            127.0.0.1       *.ivwbox.de
-            127.0.0.1       *.webtrendslive.ch
-            127.0.0.1       hyrekilo.club
-
             188.40.139.2    ns99
             10.8.0.8        ns
             176.9.139.175   hetzi manager.roleplayer.org # Hetzner EX4 Roleplayer
@@ -169,6 +164,15 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
             81.4.108.20     juslawvpn
             176.31.121.75   kimsufi
+
+            # Ad some custom blocking stuff
+            127.0.0.1       ivwbox.de
+            127.0.0.1       hyrekilo.club
+
+            # Get ad server list from: https://pgl.yoyo.org/adservers/serverlist.php?showintro=0;hostformat=hosts 
+            # and store it as /etc/nixos/adservers.txt
+            # curl -o /etc/nixos/adservers.txt https://pgl.yoyo.org/adservers/serverlist.php?showintro=0;hostformat=hosts 
+            ${builtins.readFile ./adservers.txt }
         '';
     };
 
@@ -278,10 +282,10 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     nixpkgs.config.virtualbox.enableExtensionPack = true;
     
     # Enable KVM/Qemu
-#    virtualisation.libvirtd = {
-#        enable = true;
-#        enableKVM = true;
-#    };
+    virtualisation.libvirtd = {
+        enable = true;
+        enableKVM = true;
+    };
 
 
     # Enable Avahi for local domain resoltuion
@@ -480,6 +484,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         coreutils
         curl
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
+        dos2unix
         ethtool
         exfat
         fatrace
@@ -602,8 +607,9 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         unrar
         unzip
         usbutils
-#        virtmanager
-#        virtmanager-qt
+        virt-viewer
+        virtmanager
+        virtmanager-qt
         vlc
         wget
         which
