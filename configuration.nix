@@ -21,6 +21,9 @@ in
     assert mySecrets.hostname       != "";
     assert mySecrets.smbhome        != "";
     assert mySecrets.smboffice      != "";
+    assert mySecrets.ibsuser        != "";
+    assert mySecrets.ibspass        != "";
+    assert mySecrets.ibsip          != "";
 
 {
 imports =
@@ -124,7 +127,37 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         fsType = "cifs";
         options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" "x-systemd.requires=openvpn-j-l.service" ];
     };
-
+    fileSystems."/mnt/IBS/ARCHIV" = {
+        device = "//${mySecrets.ibsip}/ARCHIV";
+        fsType = "cifs";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
+    };
+    fileSystems."/mnt/IBS/DATEN" = {
+        device = "//${mySecrets.ibsip}/DATEN";
+        fsType = "cifs";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
+    };
+    fileSystems."/mnt/IBS/INDIGO" = {
+        device = "//${mySecrets.ibsip}/INDIGO";
+        fsType = "cifs";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
+    };
+    fileSystems."/mnt/IBS/LEAD" = {
+        device = "//${mySecrets.ibsip}/LEAD";
+        fsType = "cifs";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
+    };
+    fileSystems."/mnt/IBS/SCAN" = {
+        device = "//${mySecrets.ibsip}/SCAN";
+        fsType = "cifs";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
+    };
+    fileSystems."/mnt/IBS/VERWALTUNG" = {
+        device = "//${mySecrets.ibsip}/VERWALTUNG";
+        fsType = "cifs";
+        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
+    };
+    
     # Create some folders
     system.activationScripts.media = ''
         mkdir -m 0755 -p /mnt/Audio
@@ -169,11 +202,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             127.0.0.1       ivwbox.de
             127.0.0.1       hyrekilo.club
 
-            # Get ad server list from: https://pgl.yoyo.org/adservers/serverlist.php?showintro=0;hostformat=hosts 
-            # and store it as /etc/nixos/adservers.txt and uncomment the next line OR
-            #${builtins.readFile ./adservers.txt }
-            # use the following expression to fetch latest list upon building
-            ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "https://pgl.yoyo.org/adservers/serverlist.php?showintro=0;hostformat=hosts"; })}
+            # Get ad server list from: https://pgl.yoyo.org/adservers/
+            ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "http://pgl.yoyo.org/adservers/serverlist.php?mimetype=plaintext"; })}
         '';
     };
 
@@ -391,6 +421,11 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         home-lan = {
             config = ''
                 config /root/.openvpn/home-lan/subi.conf
+            '';
+        };
+        ibs = {
+            config = ''
+                config /root/.openvpn/ibs/ibs.conf
             '';
         };
     };
