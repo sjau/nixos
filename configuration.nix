@@ -398,36 +398,12 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     # Enable OpenVPN
     services.openvpn.servers = {
-        h-b = { 
-            config = ''
-                config /root/.openvpn/h-b/SJ.conf
-            '';
-        };
-        j-l = {
-            config = ''
-                config /root/.openvpn/j-l/client.conf
-            '';
-        };
-        ks = {
-            config = ''
-                config /root/.openvpn/ks/subi.conf
-            '';
-        };
-        rp = {
-            config = ''
-                config /root/.openvpn/rp/client.conf
-            '';
-        };
-        home-lan = {
-            config = ''
-                config /root/.openvpn/home-lan/subi.conf
-            '';
-        };
-        ibs = {
-            config = ''
-                config /root/.openvpn/ibs/ibs.conf
-            '';
-        };
+        h-b     = { config = '' config /root/.openvpn/h-b/SJ.conf ''; };
+        j-l     = { config = '' config /root/.openvpn/j-l/client.conf ''; };
+        ks      = { config = '' config /root/.openvpn/ks/subi.conf ''; };
+        rp      = { config = '' config /root/.openvpn/rp/client.conf ''; };
+        hme-lan = { config = '' config /root/.openvpn/home-lan/subi.conf ''; };
+        ibs     = { config = '' config /root/.openvpn/ibs/ibs.conf ''; };
     };
 
 
