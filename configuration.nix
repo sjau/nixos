@@ -535,6 +535,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         gimp
         git
         gksu
+        gnome3.zenity
 #        gnucash
         gnupg		# GnuPG 2 -> provides gpg2 binary
         gparted
@@ -655,9 +656,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         wireshark
         xpdf    # provides pdftotext
         zip
-        (pkgs.callPackage ./pastesl.nix {})
-#        (pkgs.callPackage ./pdfForts.nix {})
-
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pastesl/master/pastesl.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
 #        (pkgs.callPackage ./swisssign-pin-entry.nix {})
