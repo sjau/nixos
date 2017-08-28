@@ -48,7 +48,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         pulseaudio.support32Bit = true; # Required for Steam
     };
 
-# Filsystem and remote dirs
+# Filsystem and remote dirs - thx to sphalerite, clever and Shados
     fileSystems = let 
     makeServer = { remotefs, userfs, passwordfs, xsystemfs, localfs }: name: {
         name = "${localfs}/${name}";
