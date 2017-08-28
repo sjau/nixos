@@ -48,128 +48,61 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         pulseaudio.support32Bit = true; # Required for Steam
     };
 
-    
-/*
-    # One day I'll fix that... loops are better than listing everything...
-    fileSystems = {
+# Filsystem and remote dirs
+    fileSystems = let 
+    makeServer = { remotefs, userfs, passwordfs, xsystemfs, localfs }: name: {
+        name = "${localfs}/${name}";
+        value = {
+            device = "//${remotefs}/${name}";
+            fsType = "cifs";
+            options = [ "noauto" "user" "uid=1000" "gid=100" "username=${userfs}" "password=${passwordfs}" "iocharset=utf8" "x-systemd.requires=${xsystemfs}" ];
+        };
+    };
+    home = makeServer {
+        remotefs = "${mySecrets.smbhome}";
+        userfs = "${mySecrets.user}";
+        passwordfs = "${mySecrets.cifs}";
+        xsystemfs = "";
+        localfs = "/mnt/home";
+    };
+    ibs = makeServer {
+        remotefs = "${mySecrets.ibsip}";
+        userfs = "${mySecrets.ibsuser}";
+        passwordfs = "${mySecrets.ibspass}";
+        xsystemfs = "openvpn-ibs.service";
+        localfs = "/mnt/IBS";
+    };
+    office = makeServer {
+        remotefs = "${mySecrets.smboffice}";
+        userfs = "none";
+        passwordfs = "none";
+        xsystemfs = "openvpn-j-l.service";
+        localfs = "/mnt/jus-law";
+    };
+    in (builtins.listToAttrs (
+        map home [ "Audio" "Shows" "SJ" "Video" "backup" "hyper" "eeePC" "rtorrent" ]
+        ++ map ibs [ "ARCHIV" "DATEN" "INDIGO" "LEAD" "VERWALTUNG" "SCAN" ]
+        ++ [( office "Advo" )]))
+    // {
         "/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
-        "/var/log" = { device = "tmpfs" ; fsType = "tmpfs"; };
         "/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
-    } //
-        (let
-            makeFileSystems = { name }: {
-                inherit name;
-                value = {
-                    device = "//${mySecrets.smbhome}/${name}";
-                    fsType = "cifs";
-                    options = "noauto,user,uid=1000,gid=100,username=hyper,password=${mySecrets.cifs},iocharset=utf8,sec=ntlm";
-                };
-            };
-        in builtins.listToAttrs (map makeFileSystems [
-            { name = "Audio"; }
-            { name = "Shows"; }
-            { name = "SJ"; }
-            { name = "Video"; }
-            { name = "backup"; }
-            { name = "hyper"; }
-            { name = "eeePC"; }
-        ]));
-*/  
-
-
-    fileSystems."/home/${mySecrets.user}/.cache" = { device = "tmpfs" ; fsType = "tmpfs"; };
-    fileSystems."/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
-    fileSystems."/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
-
-    # CIFS
-    fileSystems."/mnt/Audio" = {
-        device = "//${mySecrets.smbhome}/Audio";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
-    };
-    fileSystems."/mnt/Shows" = {
-        device = "//${mySecrets.smbhome}/Shows";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
-    };
-    fileSystems."/mnt/SJ" = {
-        device = "//${mySecrets.smbhome}/SJ";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
-    };
-    fileSystems."/mnt/Video" = {
-        device = "//${mySecrets.smbhome}/Video";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
-    };
-    fileSystems."/mnt/backup" = {
-        device = "//${mySecrets.smbhome}/backup";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
-    };
-    fileSystems."/mnt/eeePC" = {
-        device = "//${mySecrets.smbhome}/eeePC";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
-    };
-    fileSystems."/mnt/hyper" = {
-        device = "//${mySecrets.smbhome}/hyper";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
-    };
-    fileSystems."/mnt/rtorrent" = {
-        device = "//${mySecrets.smbhome}/rtorrent";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.user}" "password=${mySecrets.cifs}" "iocharset=utf8" ];
-    };
-    fileSystems."/mnt/jus-law" = {
-        device = "//${mySecrets.smboffice}/Advo";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=none" "password=none" "iocharset=utf8" "x-systemd.requires=openvpn-j-l.service" ];
-    };
-    fileSystems."/mnt/IBS/ARCHIV" = {
-        device = "//${mySecrets.ibsip}/ARCHIV";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
-    };
-    fileSystems."/mnt/IBS/DATEN" = {
-        device = "//${mySecrets.ibsip}/DATEN";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
-    };
-    fileSystems."/mnt/IBS/INDIGO" = {
-        device = "//${mySecrets.ibsip}/INDIGO";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
-    };
-    fileSystems."/mnt/IBS/LEAD" = {
-        device = "//${mySecrets.ibsip}/LEAD";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
-    };
-    fileSystems."/mnt/IBS/SCAN" = {
-        device = "//${mySecrets.ibsip}/SCAN";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
-    };
-    fileSystems."/mnt/IBS/VERWALTUNG" = {
-        device = "//${mySecrets.ibsip}/VERWALTUNG";
-        fsType = "cifs";
-        options = [ "noauto" "user" "uid=1000" "gid=100" "username=${mySecrets.ibsuser}" "password=${mySecrets.ibspass}" "iocharset=utf8" "x-systemd.requires=openvpn-ibs.service" ];
     };
     
     # Create some folders
     system.activationScripts.media = ''
-        mkdir -m 0755 -p /mnt/Audio
-        mkdir -m 0755 -p /mnt/Shows
-        mkdir -m 0755 -p /mnt/SJ
-        mkdir -m 0755 -p /mnt/Video
-        mkdir -m 0755 -p /mnt/backup
-        mkdir -m 0755 -p /mnt/eeePC
-        mkdir -m 0755 -p /mnt/hyper
-        mkdir -m 0755 -p /mnt/rtorrent
+        mkdir -m 0755 -p /mnt/home
+        mkdir -m 0755 -p /mnt/home/Audio
+        mkdir -m 0755 -p /mnt/home/Shows
+        mkdir -m 0755 -p /mnt/home/SJ
+        mkdir -m 0755 -p /mnt/home/Video
+        mkdir -m 0755 -p /mnt/home/backup
+        mkdir -m 0755 -p /mnt/home/eeePC
+        mkdir -m 0755 -p /mnt/home/hyper
+        mkdir -m 0755 -p /mnt/home/rtorrent
         mkdir -m 0755 -p /mnt/jus-law
+        mkdir -m 0755 -p /mnt/jus-law/Advo
     '';
+
 
 
     # Trust hydra. Needed for one-click installations.
