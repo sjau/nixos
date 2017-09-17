@@ -540,7 +540,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         sqlitebrowser
         sshpass
         stdenv # build-essential on nixos
-#        steam
+        steam
         subversion
         sudo
 #       suisseid-pkcs11
