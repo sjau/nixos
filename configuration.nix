@@ -246,10 +246,10 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     nixpkgs.config.virtualbox.enableExtensionPack = true;
     
     # Enable KVM/Qemu
-    virtualisation.libvirtd = {
-        enable = true;
-        enableKVM = true;
-    };
+#    virtualisation.libvirtd = {
+#        enable = true;
+#        enableKVM = true;
+#    };
 
 
     # Enable Avahi for local domain resoltuion
@@ -399,6 +399,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
 
     # The NixOS release to be compatible with for stateful data such as databases.
+    # It will e.g. upgrade databases to newer versions and that can't be reverted by Nixos.
     system.stateVersion = "17.09";
 
     nixpkgs.config.allowUnfree = true;
@@ -415,7 +416,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
     # List of packages that gets installed....
     environment.systemPackages = with pkgs; [
-        androidsdk # contains ADB
+        androidenv.platformTools # contains ADB
         aspell
         aspellDicts.de
         aspellDicts.en
@@ -430,9 +431,11 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         curl
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
         dos2unix
+        enca
         ethtool
         exfat
         fatrace
+        file
         filezilla
         firefoxWrapper
         ffmpeg
@@ -474,6 +477,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         konversation
         ktorrent
         kvm
+        libuchardet
         lxqt.lximage-qt
         okular
         oxygen
@@ -508,7 +512,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         openvpn
         parted
         (pass pkgs)
-        pastebinit
         pavucontrol
         pciutils
         pcsctools
@@ -534,6 +537,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         sox
         spectacle # KSnapShot replacement for KDE 5
         sqlite
+        sqlitebrowser
+        sshpass
         stdenv # build-essential on nixos
 #        steam
         subversion
@@ -554,9 +559,9 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         unrar
         unzip
         usbutils
-        virt-viewer
-        virtmanager
-        virtmanager-qt
+#        virt-viewer
+#        virtmanager
+#        virtmanager-qt
         vlc
         wget
         which
