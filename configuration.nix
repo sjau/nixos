@@ -577,6 +577,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
 #        (pkgs.callPackage /home/hyper/Desktop/git-repos/jusLinkComposer/jusLinkComposer.nix {})        
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/jusLinkComposer/master/jusLinkComposer.nix") {})
+        # Master PDF Editor
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/master-pdf-editor.nix") {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
