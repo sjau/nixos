@@ -526,7 +526,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         psmisc
         pwgen
         qt5Full
-        qtcreator
+#        qtcreator
         qtpass
         quiterss
         recode
