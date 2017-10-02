@@ -117,8 +117,10 @@ in
         #  enable = true;  # Enables wireless. Disable when using network manager
         networkmanager.enable = true;
         firewall.allowPing = true;
-        firewall.allowedUDPPorts = [ 5000 21025 21026 22000 22026 ];
-        firewall.allowedTCPPorts = [ 5000 22000 ];
+        firewall.allowedUDPPorts = [ 5000 5001 21025 21026 22000 22026 ];
+        firewall.allowedTCPPorts = [ 5000 5001 22000 ];
+        # Netcat: 5000
+        # IPerf: 5001
         # Syncthing: 21025 21026 22000 22026
         extraHosts = ''
             188.40.139.2    ns99
