@@ -136,7 +136,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             127.0.0.1       hyrekilo.club
 
             # Get ad server list from: https://pgl.yoyo.org/adservers/
-            ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "http://pgl.yoyo.org/adservers/serverlist.php?mimetype=plaintext"; })}
+            ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"; })}
         '';
     };
 
@@ -448,6 +448,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         git
         gksu
         gnome3.dconf
+        gnome3.dconf-editor
         gnome3.zenity
 #        gnucash
         gnupg		# GnuPG 2 -> provides gpg2 binary
@@ -540,7 +541,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         sqlitebrowser
         sshpass
         stdenv # build-essential on nixos
-        steam
+#        steam
         subversion
         sudo
 #       suisseid-pkcs11
@@ -579,6 +580,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/jusLinkComposer/master/jusLinkComposer.nix") {})
         # Master PDF Editor
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/master-pdf-editor.nix") {})
+        # getTechDetails script for collecting the tech details when bug reporting
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/getTechDetails.nix") {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
