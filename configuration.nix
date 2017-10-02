@@ -459,6 +459,7 @@ in
         inkscape
         iosevka
         iotop
+        iperf
         iputils
         jdk
         jq
