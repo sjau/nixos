@@ -26,19 +26,18 @@ in
     assert mySecrets.ibsip          != "";
 
 {
-imports =
-    [ # Include the results of the hardware scan.
-    ./hardware-configuration.nix
-    ];
+    imports =
+        [ # Include the results of the hardware scan.
+        ./hardware-configuration.nix
+        ];
 
-# Use the GRUB 2 boot loader.
-boot.loader.grub.enable = true;
-boot.loader.grub.version = 2;
-# Define on which hard drive you want to install Grub.
-boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
+    # Use the GRUB 2 boot loader.
+    boot.loader.grub.enable = true;
+    boot.loader.grub.version = 2;
+    # Define on which hard drive you want to install Grub.
+    boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
-#LUKS Stuff in hardware-cofniguration.nix
-
+    #LUKS Stuff in hardware-cofniguration.nix
     hardware = {
         # Hardware settings
         cpu.intel.updateMicrocode = true;
@@ -48,7 +47,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         pulseaudio.support32Bit = true; # Required for Steam
     };
 
-# Filsystem and remote dirs - thx to sphalerite, clever and Shados
+    # Filsystem and remote dirs - thx to sphalerite, clever and Shados
     fileSystems = let 
     makeServer = { remotefs, userfs, passwordfs, xsystemfs, localfs }: name: {
         name = "${localfs}/${name}";
@@ -87,7 +86,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         "/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
         "/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
     };
-    
+
     # Create some folders
     system.activationScripts.media = ''
         mkdir -m 0755 -p /mnt/home
@@ -142,7 +141,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
 
     # Make /etc/hosts writeable
-    environment.etc."hosts".mode = "0644";
+    #environment.etc."hosts".mode = "0644";
 
     # Enable dbus
     services.dbus.enable = true;
@@ -155,7 +154,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     };
 
 
-# List services that you want to enable:
+    # List services that you want to enable:
+
 
     # Enable the OpenSSH daemon.
     services.openssh = {
@@ -219,7 +219,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
             date.timezone = "CET"
         '';
     };
-    
+
 
     # Enable mysql
     services.mysql = {
@@ -232,7 +232,7 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 #            log_error = /var/mysql/mysql_err.log
             max_allowed_packet = 64M
         '';
-    };   
+    };
 
 
     # Enable Virtualbox
@@ -244,7 +244,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         };
     };
     nixpkgs.config.virtualbox.enableExtensionPack = true;
-    
+
+
     # Enable KVM/Qemu
 #    virtualisation.libvirtd = {
 #        enable = true;
@@ -391,13 +392,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     '';
 
 
-# List packages installed in system profile. To search by name, run:
-# $ nix-env -qaP | grep wget
-# environment.systemPackages = with pkgs; [
-#   wget
-# ];
-
-
     # The NixOS release to be compatible with for stateful data such as databases.
     # It will e.g. upgrade databases to newer versions and that can't be reverted by Nixos.
     system.stateVersion = "17.09";
@@ -414,6 +408,8 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     };
 
 
+    # List packages installed in system profile. To search by name, run:
+    # $ nix-env -qaP | grep wget
     # List of packages that gets installed....
     environment.systemPackages = with pkgs; [
         androidenv.platformTools # contains ADB
@@ -423,8 +419,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         audacity
         bash-completion
         chromium
-#        chromiumBeta
-#        chromiumDev
         cifs_utils
         cdrtools
         coreutils
@@ -450,7 +444,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         gnome3.dconf
         gnome3.dconf-editor
         gnome3.zenity
-#        gnucash
         gnupg		# GnuPG 2 -> provides gpg2 binary
         gparted
         gwenview
@@ -477,9 +470,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         kcalc
         konversation
         ktorrent
-        kvm
-        libuchardet
-        lxqt.lximage-qt
         okular
         oxygen
         oxygen-icons5
@@ -487,11 +477,15 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         plasma-desktop
         plasma-nm
         plasma-workspace
+        spectacle # KSnapShot replacement for KDE 5
 # End of KDE 5
+        kvm
         libreoffice
+        libuchardet
         lightning
         links
         lsof
+        lxqt.lximage-qt
         mc
         mkpasswd
         mktorrent
@@ -536,7 +530,6 @@ boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
         smplayer
         skype
         sox
-        spectacle # KSnapShot replacement for KDE 5
         sqlite
         sqlitebrowser
         sshpass
