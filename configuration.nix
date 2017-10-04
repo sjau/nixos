@@ -33,6 +33,7 @@ in
 
     # Add more filesystems
     boot.supportedFilesystems = [ "zfs" ];
+    boot.zfs.enableUnstable = true;
 
     # Use the GRUB 2 boot loader.
     boot.loader.grub.enable = true;
@@ -58,7 +59,7 @@ in
             device = "//${remotefs}/${name}";
             fsType = "cifs";
             options = [ "noauto" "user" "uid=1000" "gid=100" "username=${userfs}" "password=${passwordfs}" "iocharset=utf8" "x-systemd.requires=${xsystemfs}" ];
-        };
+        };boot
     };
     home = makeServer {
         remotefs = "${mySecrets.smbhome}";
@@ -153,7 +154,7 @@ in
 
     # Select internationalisation properties.
     i18n = {
-        consoleFont = "lat9w-16";
+        consoleFont = "Lat2-Terminus16";
         consoleKeyMap = "sg-latin1";
         defaultLocale = "en_US.UTF-8";
     };

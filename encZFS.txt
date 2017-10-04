@@ -1,0 +1,40 @@
+nano /etc/nixos/configuration.nix
+
+            boot.supportedFilesystems = [ "zfs" ];
+            boot.zfs.enableUnstable = true;
+
+nixos-rebuild switch
+modprobe zfs
+
+fdisk /dev/sda
+
+    o
+    n
+    p
+    1
+    [enter]
+    +500M
+    n
+    p
+    2
+    [enter]
+    [enter]
+    w
+
+zpool create -o ashift=12 -o altroot/mnt tank /dev/sda2
+zfs create -o encryption=aes-256-gcm -o keyformat=passphrase -o mountpoint=none tank/encfs
+    [password]
+    [password]
+zfs create -o mountpoint=legacy tank/encfs/nixos
+mount -t zfs tank/encfs/nixos /mnt
+mkdir /mnt/boot
+mkfs.ext4 /dev/sda1
+mount /dev/sda1 /mnt/boot
+nixos-generate-config  --root /mnt
+
+nano /mnt/etc/nixos/configuration.nix
+
+            boot.supportedFilesystems = [ "zfs" ];
+            boot.zfs.enableUnstable = true;
+
+            hostId = "bac8c473";
