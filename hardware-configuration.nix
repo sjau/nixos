@@ -22,7 +22,12 @@
       fsType = "ext4";
     };
  
-  fileSystems."/VMs" =
+  fileSystems."/mnt/encZFS/Media" =
+    { device = "tank/encfs/Media";
+      fsType = "zfs";
+    };
+
+  fileSystems."/mnt/encZFS/VMs" =
     { device = "tank/encfs/VMs";
       fsType = "zfs";
     };
