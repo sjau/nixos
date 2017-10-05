@@ -59,7 +59,7 @@ in
             device = "//${remotefs}/${name}";
             fsType = "cifs";
             options = [ "noauto" "user" "uid=1000" "gid=100" "username=${userfs}" "password=${passwordfs}" "iocharset=utf8" "x-systemd.requires=${xsystemfs}" ];
-        };boot
+        };
     };
     home = makeServer {
         remotefs = "${mySecrets.smbhome}";

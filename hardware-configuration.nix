@@ -8,27 +8,23 @@
     [ <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ehci_pci" "ahci" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "ehci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.kernelModules = [ "kvm-intel" "tun" "virtio" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/c0a0a237-c943-41bd-b3e2-d6b98fdbc58f";
-      fsType = "ext4";
-      options = [ "discard" "noatime" "nodiratime" ];
+    { device = "tank/encfs/nixos";
+      fsType = "zfs";
     };
 
-#  boot.initrd.luks.devices."sda".device = "/dev/disk/by-uuid/4f4d55a9-3b6b-42f0-b51d-f95ffea6d10a";
-
-  boot.initrd.luks.devices = [{
-      name = "crypto_root";
-      device = "/dev/disk/by-uuid/4f4d55a9-3b6b-42f0-b51d-f95ffea6d10a";
-      allowDiscards = true;
-  }];
-
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/a6895647-296f-4ee0-90ad-3e0881de6168";
+    { device = "/dev/disk/by-uuid/95243a41-5960-4543-a1c0-12267d95f5c8";
       fsType = "ext4";
+    };
+ 
+  fileSystems."/VMs" =
+    { device = "tank/encfs/VMs";
+      fsType = "zfs";
     };
 
   swapDevices = [ ];
