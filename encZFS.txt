@@ -43,3 +43,8 @@ nano /mnt/etc/nixos/configuration.nix
             boot.zfs.enableUnstable = true;
 
             hostId = "bac8c473";
+
+
+# Open DD image:
+
+losetup --offset 500170752 /dev/loop2 sda.img

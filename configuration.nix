@@ -484,6 +484,7 @@ in
         plasma-desktop
         plasma-nm
         plasma-workspace
+        pv
         spectacle # KSnapShot replacement for KDE 5
 # End of KDE 5
         kvm
