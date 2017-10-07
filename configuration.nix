@@ -34,6 +34,16 @@ in
     # Add more filesystems
     boot.supportedFilesystems = [ "zfs" ];
     boot.zfs.enableUnstable = true;
+    services.zfs.autoSnapshot = {
+        enable = true;
+        #frequent = 8; # keep the latest eight 15-minute snapshots (instead of four)
+        #monthly = 1;  # keep only one monthly snapshot (instead of twelve)
+    };
+    services.zfs.autoScrub = {
+        enable = true;
+        interval = "daily";
+        pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
+    };
 
     # Use the GRUB 2 boot loader.
     boot.loader.grub.enable = true;
@@ -228,17 +238,17 @@ in
 
 
     # Enable mysql
-    services.mysql = {
-        enable = true;
-        dataDir = "/var/mysql";
-        rootPassword = "${mySecrets.passwd}";
-        user = "mysql";
-        package = pkgs.mysql;
-        extraOptions = ''
+#    services.mysql = {
+#        enable = true;
+#        dataDir = "/var/mysql";
+#        rootPassword = "${mySecrets.passwd}";
+#        user = "mysql";
+#        package = pkgs.mysql;
+#        extraOptions = ''
 #            log_error = /var/mysql/mysql_err.log
-            max_allowed_packet = 64M
-        '';
-    };
+#            max_allowed_packet = 64M
+#        '';
+#    };
 
 
     # Enable Virtualbox
@@ -283,7 +293,7 @@ in
     services.cron = {
         enable = true;
         systemCronJobs = [
-            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
+#            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
             "30 * * * * ${mySecrets.user} pass git pull"
@@ -428,6 +438,7 @@ in
         cifs_utils
         cdrtools
         coreutils
+        cryptsetup
         curl
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
         dos2unix
@@ -484,7 +495,6 @@ in
         plasma-desktop
         plasma-nm
         plasma-workspace
-        pv
         spectacle # KSnapShot replacement for KDE 5
 # End of KDE 5
         kvm
@@ -525,6 +535,7 @@ in
         pinentry_qt4
         playonlinux
         poppler_utils # provides command_not_found
+        pv
         python27Packages.youtube-dl
         psmisc
         pwgen

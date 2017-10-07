@@ -9,26 +9,26 @@
     ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ehci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
-  boot.kernelModules = [ "kvm-intel" "tun" "virtio" ];
+  boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "tank/encfs/nixos";
+    { device = "tank/encZFS/Nixos";
       fsType = "zfs";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/95243a41-5960-4543-a1c0-12267d95f5c8";
+    { device = "/dev/disk/by-uuid/772eb75c-232a-4d8e-ae1f-ff203c18c69d";
       fsType = "ext4";
     };
- 
+
   fileSystems."/mnt/encZFS/Media" =
-    { device = "tank/encfs/Media";
+    { device = "tank/encZFS/Media";
       fsType = "zfs";
     };
 
   fileSystems."/mnt/encZFS/VMs" =
-    { device = "tank/encfs/VMs";
+    { device = "tank/encZFS/VMs";
       fsType = "zfs";
     };
 
