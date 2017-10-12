@@ -31,12 +31,16 @@ in
         ./hardware-configuration.nix
         ];
 
+    # Use latest kernel
+#    boot.kernelPackages = pkgs.linuxPackages_latest;  # Set in the vbox settings
+
     # Add more filesystems
     boot.supportedFilesystems = [ "zfs" ];
     boot.zfs.enableUnstable = true;
+    boot.zfs.devNodes = "/dev";
     services.zfs.autoSnapshot = {
         enable = true;
-        #frequent = 8; # keep the latest eight 15-minute snapshots (instead of four)
+        #frequent = 9; # keep the latest eight 15-minute snapshots (instead of four)
         #monthly = 1;  # keep only one monthly snapshot (instead of twelve)
     };
     services.zfs.autoScrub = {
@@ -45,13 +49,17 @@ in
         pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
     };
 
+    # Add memtest86
+    boot.loader.grub.memtest86.enable = true;
+
     # Use the GRUB 2 boot loader.
     boot.loader.grub.enable = true;
     boot.loader.grub.version = 2;
     # Define on which hard drive you want to install Grub.
     boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
-    #LUKS Stuff in hardware-cofniguration.nix
+
+    # Load additional hardware stuff
     hardware = {
         # Hardware settings
         cpu.intel.updateMicrocode = true;
@@ -190,6 +198,7 @@ in
     # Enable the X11 windowing system.
     services.xserver = {
         enable = true;
+        videoDrivers = [ "intel" ];
         layout = "ch";
         xkbOptions = "eurosign:e";
         synaptics = {
@@ -205,6 +214,13 @@ in
             };
         };
         desktopManager.plasma5.enable = true;
+    };
+
+
+    # Use KDE5 unstable
+    nixpkgs.config.packageOverrides = super: let self = super.pkgs; in {
+        plasma5_stable = self.plasma5_latest;
+        kdeApps_stable = self.kdeApps_latest;
     };
 
 
@@ -253,7 +269,7 @@ in
 
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
-    boot.kernelPackages = pkgs.linuxPackages // {
+    boot.kernelPackages = pkgs.linuxPackages_latest // {
         virtualbox = pkgs.linuxPackages.virtualbox.override {
             enableExtensionPack = true;
             pulseSupport = true;
@@ -293,7 +309,7 @@ in
     services.cron = {
         enable = true;
         systemCronJobs = [
-#            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
+            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
             "30 * * * * ${mySecrets.user} pass git pull"
@@ -417,12 +433,6 @@ in
         enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works 
     };
 
-    # Use KDE5 unstable
-    nixpkgs.config.packageOverrides = super: let self = super.pkgs; in {
-        plasma5_stable = self.plasma5_latest;
-        kdeApps_stable = self.kdeApps_latest;
-    };
-
 
     # List packages installed in system profile. To search by name, run:
     # $ nix-env -qaP | grep wget
@@ -448,7 +458,7 @@ in
         fatrace
         file
         filezilla
-        firefoxWrapper
+#        firefoxWrapper
         ffmpeg
         foo2zjs			# Printer drivers for Oki -> http://foo2hiperc.rkkda.com/
         foomatic-filters
@@ -539,6 +549,7 @@ in
         python27Packages.youtube-dl
         psmisc
         pwgen
+        qemu
         qt5Full
 #        qtcreator
         qtpass

@@ -8,18 +8,15 @@
     [ <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ehci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "usbhid" "sd_mod" "sr_mod" "sdhci_pci" ];
   boot.kernelModules = [ "kvm-intel" ];
-  boot.extraModulePackages = [ ];
+  boot.extraModulePackages = [ config.boot.kernelPackages.rtlwifi_new ];
+  # Deactivate discreet optimus/nvidia card
+  boot.blacklistedKernelModules = [ "nouveau" ];
 
   fileSystems."/" =
     { device = "tank/encZFS/Nixos";
       fsType = "zfs";
-    };
-
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/772eb75c-232a-4d8e-ae1f-ff203c18c69d";
-      fsType = "ext4";
     };
 
   fileSystems."/mnt/encZFS/Media" =
@@ -30,6 +27,11 @@
   fileSystems."/mnt/encZFS/VMs" =
     { device = "tank/encZFS/VMs";
       fsType = "zfs";
+    };
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/81c7ba48-71dd-4060-8abe-5c5bcd5b4edc";
+      fsType = "ext4";
     };
 
   swapDevices = [ ];
