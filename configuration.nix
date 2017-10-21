@@ -14,16 +14,30 @@ let
 
 in
     # Check if custom vars are set
-    assert mySecrets.user           != "";
-    assert mySecrets.passwd         != "";
-    assert mySecrets.hashedpasswd   != "";
-    assert mySecrets.cifs           != "";
-    assert mySecrets.hostname       != "";
-    assert mySecrets.smbhome        != "";
-    assert mySecrets.smboffice      != "";
-    assert mySecrets.ibsuser        != "";
-    assert mySecrets.ibspass        != "";
-    assert mySecrets.ibsip          != "";
+    assert mySecrets.user            != "";
+    assert mySecrets.passwd          != "";
+    assert mySecrets.hashedpasswd    != "";
+    assert mySecrets.cifs            != "";
+    assert mySecrets.hostname        != "";
+    assert mySecrets.smbhome         != "";
+    assert mySecrets.smboffice       != "";
+    assert mySecrets.ibsuser         != "";
+    assert mySecrets.ibspass         != "";
+    assert mySecrets.ibsip           != "";
+
+    # Wireguard
+    ## Private Key
+    assert mySecrets.wg_priv_key     != "";
+    ## Home VPN
+    assert mySecrets.wg_home_ips     != "";
+    assert mySecrets.wg_home_allowed != "";
+    assert mySecrets.wg_home_end     != "";
+    assert mySecrets.wg_home_pubkey  != "";
+    ## Aubi VPN
+    assert mySecrets.wg_aubi_ips     != "";
+    assert mySecrets.wg_aubi_allowed != "";
+    assert mySecrets.wg_aubi_end     != "";
+    assert mySecrets.wg_aubi_pubkey  != "";
 
 {
     imports =
@@ -269,7 +283,8 @@ in
 
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
-    boot.kernelPackages = pkgs.linuxPackages_latest // {
+#    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
+    boot.kernelPackages = pkgs.linuxPackages // {
         virtualbox = pkgs.linuxPackages.virtualbox.override {
             enableExtensionPack = true;
             pulseSupport = true;
@@ -278,19 +293,12 @@ in
     nixpkgs.config.virtualbox.enableExtensionPack = true;
 
 
-    # Enable KVM/Qemu
-#    virtualisation.libvirtd = {
-#        enable = true;
-#        enableKVM = true;
-#    };
-
-
     # Enable Avahi for local domain resoltuion
-    services.avahi = {
-        enable = true;
-        hostName = "${mySecrets.hostname}";
-        nssmdns = true;
-    };
+#    services.avahi = {
+#        enable = true;
+#        hostName = "${mySecrets.hostname}";
+#        nssmdns = true;
+#    };
 
 
     # Enable nscd
@@ -309,13 +317,27 @@ in
     services.cron = {
         enable = true;
         systemCronJobs = [
-            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
+#            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
             "30 * * * * ${mySecrets.user} pass git pull"
             "40 * * * * ${mySecrets.user} pass git push"
+            "*/5 * * * * root autoResilver 'tank' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
         ];
     };
+
+    systemd.services.stopResilver = {
+        description = "Stop Resilvering / Mirroring upon powering down";
+        wantedBy = [ "multi-user.target" ];
+        bindsTo = [ "multi-user.target" ];
+        serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "/run/current-system/sw/bin/true";
+            ExecStop = "/run/current-system/sw/bin/stopResilver 'tank' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'";
+            RemainAfterExit = true;
+        };
+    };
+    systemd.services.stopResilver.enable = true;
 
 
     # Setuid
@@ -370,6 +392,30 @@ in
         rp      = { config = '' config /root/.openvpn/rp/client.conf ''; };
         hme-lan = { config = '' config /root/.openvpn/home-lan/subi.conf ''; };
         ibs     = { config = '' config /root/.openvpn/ibs/ibs.conf ''; };
+    };
+    
+    # Enable Wireguard
+    networking.wireguard.interfaces = {
+        wg_home = {
+            ips = [ "${mySecrets.wg_home_ips}" ];
+            privateKey = "${mySecrets.wg_priv_key}";
+            peers = [ {
+                allowedIPs = [ "${mySecrets.wg_home_allowed}" ];
+                endpoint = "${mySecrets.wg_home_end}";
+                publicKey = "${mySecrets.wg_home_pubkey}";
+                persistentKeepalive = 25;
+            } ];
+        };
+        wg_aubi = {
+            ips = [ "${mySecrets.wg_aubi_ips}" ];
+            privateKey = "${mySecrets.wg_priv_key}";
+            peers = [ {
+                allowedIPs = [ "${mySecrets.wg_aubi_allowed}" ];
+                endpoint = "${mySecrets.wg_aubi_end}";
+                publicKey = "${mySecrets.wg_aubi_pubkey}";
+                persistentKeepalive = 25;
+            } ];
+        };
     };
 
 
@@ -426,7 +472,7 @@ in
 
     # The NixOS release to be compatible with for stateful data such as databases.
     # It will e.g. upgrade databases to newer versions and that can't be reverted by Nixos.
-    system.stateVersion = "17.09";
+    system.stateVersion = "18.03";
 
     nixpkgs.config.allowUnfree = true;
     nixpkgs.config.chromium = {
@@ -458,7 +504,7 @@ in
         fatrace
         file
         filezilla
-#        firefoxWrapper
+        firefoxWrapper
         ffmpeg
         foo2zjs			# Printer drivers for Oki -> http://foo2hiperc.rkkda.com/
         foomatic-filters
@@ -512,6 +558,7 @@ in
         libuchardet
         lightning
         links
+        lshw
         lsof
         lxqt.lximage-qt
         mc
@@ -556,6 +603,7 @@ in
         quiterss
         recode
         recoll
+        rfkill
         smartmontools
         smplayer
         skype
@@ -583,15 +631,13 @@ in
         unrar
         unzip
         usbutils
-#        virt-viewer
-#        virtmanager
-#        virtmanager-qt
         vlc
         wget
         which
         whois
         wine
         winetricks
+        wireguard
         wireshark
         xpdf    # provides pdftotext
         zip
@@ -603,14 +649,20 @@ in
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/jusLinkComposer/master/jusLinkComposer.nix") {})
         # Master PDF Editor
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/master-pdf-editor.nix") {})
-        # getTechDetails script for collecting the tech details when bug reporting
+        # getTechDetails - script for collecting the tech details when bug reporting
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/getTechDetails.nix") {})
+        # *Resilver - script that automatically resilver attached drives with the zpool or sets them to offline during powering down
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/autoResilver.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/stopResilver.nix") {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
 #        (pkgs.callPackage ./swisssign-pin-entry.nix {})
 #       (pkgs.callPackage ./swisssigner.nix {})
 #   ] ++ ( builtins.filter pkgs.stdenv.lib.isDerivation (builtins.attrValues kdeApps_stable));
+
+#        rtorrent-ps
+
     ];
 
 # suisseid-pkcs11 requires on ubuntu the following packages:
