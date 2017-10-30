@@ -33,11 +33,6 @@ in
     assert mySecrets.wg_home_allowed != "";
     assert mySecrets.wg_home_end     != "";
     assert mySecrets.wg_home_pubkey  != "";
-    ## Aubi VPN
-    assert mySecrets.wg_aubi_ips     != "";
-    assert mySecrets.wg_aubi_allowed != "";
-    assert mySecrets.wg_aubi_end     != "";
-    assert mySecrets.wg_aubi_pubkey  != "";
 
 {
     imports =
@@ -63,6 +58,12 @@ in
         pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
     };
 
+# Sending doesn't work with encryption....
+#    services.znapzend = {
+#        enable = true;
+#        autoCreation = true;
+#    };
+
     # Add memtest86
     boot.loader.grub.memtest86.enable = true;
 
@@ -76,7 +77,7 @@ in
     # Load additional hardware stuff
     hardware = {
         # Hardware settings
-        cpu.intel.updateMicrocode = true;
+#        cpu.intel.updateMicrocode = true;
         enableAllFirmware = true;
         pulseaudio.enable = true;
         opengl.driSupport32Bit = true;  # Required for Steam
@@ -125,16 +126,8 @@ in
 
     # Create some folders
     system.activationScripts.media = ''
-        mkdir -m 0755 -p /mnt/home
-        mkdir -m 0755 -p /mnt/home/Audio
-        mkdir -m 0755 -p /mnt/home/Shows
-        mkdir -m 0755 -p /mnt/home/SJ
-        mkdir -m 0755 -p /mnt/home/Video
-        mkdir -m 0755 -p /mnt/home/backup
-        mkdir -m 0755 -p /mnt/home/eeePC
-        mkdir -m 0755 -p /mnt/home/hyper
-        mkdir -m 0755 -p /mnt/home/rtorrent
-        mkdir -m 0755 -p /mnt/jus-law
+        mkdir -m 0755 -p /mnt/home/{Audio,Shows,SJ,Video,backup,eeePC,hyper,rtorrent}
+        mkdir -m 0755 -p /mnt/ibs/{ARCHIV,DATEN,INDIGO,LEAD,VERWALTUNG,SCAN}
         mkdir -m 0755 -p /mnt/jus-law/Advo
     '';
 
@@ -380,6 +373,8 @@ in
             inconsolata
             gentium
             ubuntu_font_family
+            source-sans-pro
+            source-code-pro
         ];
     };
 
@@ -403,16 +398,6 @@ in
                 allowedIPs = [ "${mySecrets.wg_home_allowed}" ];
                 endpoint = "${mySecrets.wg_home_end}";
                 publicKey = "${mySecrets.wg_home_pubkey}";
-                persistentKeepalive = 25;
-            } ];
-        };
-        wg_aubi = {
-            ips = [ "${mySecrets.wg_aubi_ips}" ];
-            privateKey = "${mySecrets.wg_priv_key}";
-            peers = [ {
-                allowedIPs = [ "${mySecrets.wg_aubi_allowed}" ];
-                endpoint = "${mySecrets.wg_aubi_end}";
-                publicKey = "${mySecrets.wg_aubi_pubkey}";
                 persistentKeepalive = 25;
             } ];
         };
@@ -519,6 +504,7 @@ in
         gnome3.zenity
         gnupg		# GnuPG 2 -> provides gpg2 binary
         gparted
+        gptfdisk
         gwenview
         hdparm
         htop
@@ -569,9 +555,10 @@ in
         mpv
         ms-sys
         mumble
-        mupdf
+#         mupdf
         netcat-gnu
         nmap
+        nix-index # provides nix-locate
         nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
         nox     # Easy search for packages
         nss
@@ -582,6 +569,7 @@ in
         openvpn
         parted
         (pass pkgs)
+        patchelf
         pavucontrol
         pciutils
         pcsctools
@@ -604,6 +592,7 @@ in
         recode
         recoll
         rfkill
+        simplescreenrecorder
         smartmontools
         smplayer
         skype
@@ -660,8 +649,6 @@ in
 #        (pkgs.callPackage ./swisssign-pin-entry.nix {})
 #       (pkgs.callPackage ./swisssigner.nix {})
 #   ] ++ ( builtins.filter pkgs.stdenv.lib.isDerivation (builtins.attrValues kdeApps_stable));
-
-#        rtorrent-ps
 
     ];
 
