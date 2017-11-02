@@ -41,6 +41,7 @@ in
         ];
 
     # Use latest kernel
+    boot.kernelPackages = pkgs.linuxPackages_testing;  # Get bleeding edge kernel
 #    boot.kernelPackages = pkgs.linuxPackages_latest;  # Set in the vbox settings
 
     # Add more filesystems
@@ -161,10 +162,6 @@ in
             81.4.108.20     juslawvpn
             176.31.121.75   kimsufi
 
-            # Ad some custom blocking stuff
-            127.0.0.1       ivwbox.de
-            127.0.0.1       hyrekilo.club
-
             # Get ad server list from: https://pgl.yoyo.org/adservers/
             ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"; })}
         '';
@@ -276,8 +273,8 @@ in
 
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
-#    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
-    boot.kernelPackages = pkgs.linuxPackages // {
+    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
+#    boot.kernelPackages = pkgs.linuxPackages // {
         virtualbox = pkgs.linuxPackages.virtualbox.override {
             enableExtensionPack = true;
             pulseSupport = true;
@@ -558,7 +555,7 @@ in
 #         mupdf
         netcat-gnu
         nmap
-        nix-index # provides nix-locate
+#        nix-index # provides nix-locate
         nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
         nox     # Easy search for packages
         nss
@@ -609,13 +606,13 @@ in
         sylpheed
         syncthing
         sysfsutils
+        sysstat
         system_config_printer
         teamspeak_client
         teamviewer
         tesseract
         thunderbird
         tmux
-        unetbootin
         unoconv
         unrar
         unzip
