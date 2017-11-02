@@ -41,8 +41,7 @@ in
         ];
 
     # Use latest kernel
-    boot.kernelPackages = pkgs.linuxPackages_testing;  # Get bleeding edge kernel
-#    boot.kernelPackages = pkgs.linuxPackages_latest;  # Set in the vbox settings
+    # See VirtualBox settings
 
     # Add more filesystems
     boot.supportedFilesystems = [ "zfs" ];
@@ -273,7 +272,8 @@ in
 
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
-    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
+    boot.kernelPackages = pkgs.linuxPackages_testing // {  # use bleeding edge kernel
+#    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
 #    boot.kernelPackages = pkgs.linuxPackages // {
         virtualbox = pkgs.linuxPackages.virtualbox.override {
             enableExtensionPack = true;
