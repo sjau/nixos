@@ -272,8 +272,8 @@ in
 
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
-    boot.kernelPackages = pkgs.linuxPackages_testing // {  # use bleeding edge kernel
-#    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
+#    boot.kernelPackages = pkgs.linuxPackages_testing // {  # use bleeding edge kernel
+    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
 #    boot.kernelPackages = pkgs.linuxPackages // {
         virtualbox = pkgs.linuxPackages.virtualbox.override {
             enableExtensionPack = true;
@@ -284,11 +284,11 @@ in
 
 
     # Enable Avahi for local domain resoltuion
-#    services.avahi = {
-#        enable = true;
-#        hostName = "${mySecrets.hostname}";
-#        nssmdns = true;
-#    };
+    services.avahi = {
+        enable = true;
+        hostName = "${mySecrets.hostname}";
+        nssmdns = true;
+    };
 
 
     # Enable nscd
