@@ -46,7 +46,7 @@ in
     # Add more filesystems
     boot.supportedFilesystems = [ "zfs" ];
     boot.zfs.enableUnstable = true;
-    boot.zfs.devNodes = "/dev";
+#    boot.zfs.devNodes = "/dev";
     services.zfs.autoSnapshot = {
         enable = true;
         #frequent = 9; # keep the latest eight 15-minute snapshots (instead of four)
@@ -57,6 +57,42 @@ in
         interval = "daily";
         pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
     };
+
+    # old:  srcversion:     B173E7ADA66CCF1436764A7
+    # modinfo zfs > /tmp/zfs
+#    nixpkgs.overlays = [ (
+#        self: super: {
+#            linuxPackagesXXX = super.linuxPackagesXXX // {
+#                zfsUnstable = super.linuxPackages.zfsUnstable.overrideAttrs (oldAttrs: rec {
+#                    version = "2017-11-11";
+#                    src = pkgs.fetchFromGitHub {
+#                        owner = "zfsonlinux";
+#                        repo = "zfs";
+#                        rev = "c0daec32f839f687a7b631ea8c292dfb2637478a";
+#                        sha256 = "032pzhb28ywmmydck8nvfnanj30vwm148gwk7qvsbgx39ip1y1f8";
+#                    };
+#                });
+#            };
+#            zfsUnstable = super.zfsUnstable.overrideAttrs (oldAttrs: rec {
+#                version = "2017-11-11";
+#                src = pkgs.fetchFromGitHub {
+#                    owner = "zfsonlinux";
+#                    repo = "zfs";
+#                    rev = "c0daec32f839f687a7b631ea8c292dfb2637478a";
+#                    sha256 = "032pzhb28ywmmydck8nvfnanj30vwm148gwk7qvsbgx39ip1y1f8";
+#                };
+#            });
+#            splUnstable = super.splUnstable.overrideAttrs (oldAttrs: rec {
+#                version = "2017-30-10";
+#                src = pkgs.fetchFromGitHub {
+#                    owner = "zfsonlinux";
+#                    repo = "spl";
+#                    rev = "35a44fcb8d6e346f51be82dfe57562c2ea0c6a9c";
+#                    sha256 = "1s2w54927fsxg0f037h31g3qkajgn5jd0x3yi1chx00000000000";
+#                };
+#            });
+#        }
+#    ) ];
 
 # Sending doesn't work with encryption....
 #    services.znapzend = {
@@ -138,6 +174,8 @@ in
 
     # Setup networking
     networking = {
+        # Disable IPv6
+        enableIPv6 = false;
         hostName = "${mySecrets.hostname}"; # Define your hostname.
         hostId = "bac8c473";
         #  enable = true;  # Enables wireless. Disable when using network manager
@@ -287,7 +325,7 @@ in
     services.avahi = {
         enable = true;
         hostName = "${mySecrets.hostname}";
-        nssmdns = true;
+#        nssmdns = true;
     };
 
 
@@ -312,7 +350,7 @@ in
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
             "30 * * * * ${mySecrets.user} pass git pull"
             "40 * * * * ${mySecrets.user} pass git push"
-            "*/5 * * * * root autoResilver 'tank' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
+            "*/5 * * * * root autoResilver 'tank' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0-part1'"
         ];
     };
 
@@ -323,7 +361,7 @@ in
         serviceConfig = {
             Type = "oneshot";
             ExecStart = "/run/current-system/sw/bin/true";
-            ExecStop = "/run/current-system/sw/bin/stopResilver 'tank' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'";
+            ExecStop = "/run/current-system/sw/bin/stopResilver 'tank' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0-part1'";
             RemainAfterExit = true;
         };
     };
@@ -475,6 +513,7 @@ in
         chromium
         cifs_utils
         cdrtools
+        conkeror
         coreutils
         cryptsetup
         curl
@@ -617,6 +656,8 @@ in
         unrar
         unzip
         usbutils
+        virtmanager
+        virt-viewer
         vlc
         wget
         which
@@ -640,6 +681,10 @@ in
         # *Resilver - script that automatically resilver attached drives with the zpool or sets them to offline during powering down
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/autoResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/stopResilver.nix") {})
+        # wgDebug - needed for wg debugging
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgDebug.nix") {})
+        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/batchsigner.nix {})
+
 
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
