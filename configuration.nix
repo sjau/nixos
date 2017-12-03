@@ -57,48 +57,11 @@ in
         interval = "daily";
         pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
     };
-
-    # old:  srcversion:     B173E7ADA66CCF1436764A7
-    # modinfo zfs > /tmp/zfs
-#    nixpkgs.overlays = [ (
-#        self: super: {
-#            linuxPackagesXXX = super.linuxPackagesXXX // {
-#                zfsUnstable = super.linuxPackages.zfsUnstable.overrideAttrs (oldAttrs: rec {
-#                    version = "2017-11-11";
-#                    src = pkgs.fetchFromGitHub {
-#                        owner = "zfsonlinux";
-#                        repo = "zfs";
-#                        rev = "c0daec32f839f687a7b631ea8c292dfb2637478a";
-#                        sha256 = "032pzhb28ywmmydck8nvfnanj30vwm148gwk7qvsbgx39ip1y1f8";
-#                    };
-#                });
-#            };
-#            zfsUnstable = super.zfsUnstable.overrideAttrs (oldAttrs: rec {
-#                version = "2017-11-11";
-#                src = pkgs.fetchFromGitHub {
-#                    owner = "zfsonlinux";
-#                    repo = "zfs";
-#                    rev = "c0daec32f839f687a7b631ea8c292dfb2637478a";
-#                    sha256 = "032pzhb28ywmmydck8nvfnanj30vwm148gwk7qvsbgx39ip1y1f8";
-#                };
-#            });
-#            splUnstable = super.splUnstable.overrideAttrs (oldAttrs: rec {
-#                version = "2017-30-10";
-#                src = pkgs.fetchFromGitHub {
-#                    owner = "zfsonlinux";
-#                    repo = "spl";
-#                    rev = "35a44fcb8d6e346f51be82dfe57562c2ea0c6a9c";
-#                    sha256 = "1s2w54927fsxg0f037h31g3qkajgn5jd0x3yi1chx00000000000";
-#                };
-#            });
-#        }
-#    ) ];
-
-# Sending doesn't work with encryption....
-#    services.znapzend = {
-#        enable = true;
-#        autoCreation = true;
-#    };
+    # Limit ARC size to max. 4 GB, otherwise qemu is unhappy
+#    boot.extraModprobeConfig = ''
+#        options zfs zfs_arc_min=508185728
+#        options zfs zfs_arc_min=4294967296
+#    '';
 
     # Add memtest86
     boot.loader.grub.memtest86.enable = true;
@@ -137,13 +100,13 @@ in
         xsystemfs = "";
         localfs = "/mnt/home";
     };
-    ibs = makeServer {
-        remotefs = "${mySecrets.ibsip}";
-        userfs = "${mySecrets.ibsuser}";
-        passwordfs = "${mySecrets.ibspass}";
-        xsystemfs = "openvpn-ibs.service";
-        localfs = "/mnt/IBS";
-    };
+#    ibs = makeServer {
+#        remotefs = "${mySecrets.ibsip}";
+#        userfs = "${mySecrets.ibsuser}";
+#        passwordfs = "${mySecrets.ibspass}";
+#        xsystemfs = "openvpn-ibs.service";
+#        localfs = "/mnt/IBS";
+#    };
     office = makeServer {
         remotefs = "${mySecrets.smboffice}";
         userfs = "none";
@@ -153,7 +116,7 @@ in
     };
     in (builtins.listToAttrs (
         map home [ "Audio" "Shows" "SJ" "Video" "backup" "hyper" "eeePC" "rtorrent" ]
-        ++ map ibs [ "ARCHIV" "DATEN" "INDIGO" "LEAD" "VERWALTUNG" "SCAN" ]
+#        ++ map ibs [ "ARCHIV" "DATEN" "INDIGO" "LEAD" "VERWALTUNG" "SCAN" ]
         ++ [( office "Advo" )]))
     // {
         "/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
@@ -309,16 +272,17 @@ in
 
 
     # Enable Virtualbox
-    virtualisation.virtualbox.host.enable = true;
+#    virtualisation.virtualbox.host.enable = true;
 #    boot.kernelPackages = pkgs.linuxPackages_testing // {  # use bleeding edge kernel
-    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
+    boot.kernelPackages = pkgs.linuxPackages_latest; # use latest kernel
+#    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
 #    boot.kernelPackages = pkgs.linuxPackages // {
-        virtualbox = pkgs.linuxPackages.virtualbox.override {
-            enableExtensionPack = true;
-            pulseSupport = true;
-        };
-    };
-    nixpkgs.config.virtualbox.enableExtensionPack = true;
+#        virtualbox = pkgs.linuxPackages.virtualbox.override {
+#            enableExtensionPack = true;
+#            pulseSupport = true;
+#        };
+#    };
+#    nixpkgs.config.virtualbox.enableExtensionPack = true;
 
 
     # Enable Avahi for local domain resoltuion
@@ -385,7 +349,7 @@ in
     users.extraUsers.${mySecrets.user} = {
         isNormalUser = true;    # creates home, adds to group users, sets default shell
         description = "${mySecrets.user}";
-        extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" "cdrom" "kvm" ]; # wheel is for the sudo group
+        extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" "cdrom" "kvm" "libvirtd" ]; # wheel is for the sudo group
         uid = 1000;
         initialHashedPassword = "${mySecrets.hashedpasswd}";
     };
@@ -421,9 +385,10 @@ in
         ks      = { config = '' config /root/.openvpn/ks/subi.conf ''; };
         rp      = { config = '' config /root/.openvpn/rp/client.conf ''; };
         hme-lan = { config = '' config /root/.openvpn/home-lan/subi.conf ''; };
-        ibs     = { config = '' config /root/.openvpn/ibs/ibs.conf ''; };
+#        ibs     = { config = '' config /root/.openvpn/ibs/ibs.conf ''; };
     };
-    
+
+
     # Enable Wireguard
     networking.wireguard.interfaces = {
         wg_home = {
@@ -438,6 +403,49 @@ in
         };
     };
 
+
+    # Enable libvirtd daemon
+    virtualisation.libvirtd = {
+        enable = true;
+        enableKVM = true;
+    };
+    services.spice-vdagentd.enable = true;
+    # Make smartcard reader and label printer accessible to everyone, so they can be passed to the VM
+    services.udev.extraRules = ''
+        SUBSYSTEM=="usb", ATTR{idVendor}=="072f", ATTR{idProduct}=="90cc", GROUP="users", MODE="0777"
+        SUBSYSTEM=="usb", ATTR{idVendor}=="04f9", ATTR{idProduct}=="2043", GROUP="users", MODE="0777"
+    '';
+
+
+    # Samba
+    services.samba = {
+        enable = true;
+        securityType = "user";
+        syncPasswordsByPam = true;  # Enabling this will add a line directly after pam_unix.so.
+                                    # Whenever a password is changed the samba password will be updated as well.
+                                    # However, you still have to add the samba password once, using smbpasswd -a user.
+        extraConfig = ''
+            server string = ${mySecrets.hostname}
+            netbios name = ${mySecrets.hostname}
+            workgroup = WORKGROUP
+            socket options = TCP_NODELAY IPTOS_LOWDELAY SO_KEEPALIVE
+            security = user
+            name resolve order = hosts wins bcast
+#            wins support = yes
+            guest account = hyper
+            map to guest = bad user
+        '';
+        shares = {
+            Desktop = {
+                path = "/home/hyper/Desktop";
+                browseable = "yes";
+                "read only" = "no";
+                "create mask" = "0644";
+                "directory mask" = "0755";
+                "username" = "hyper";
+            };
+        };
+    };
 
     # Enable smartmon daemon
     services.smartd = {
@@ -554,6 +562,7 @@ in
         iperf
         iputils
         jdk
+        jpegoptim
         jq
         jre
 # KDE 5
@@ -583,6 +592,7 @@ in
         lshw
         lsof
         lxqt.lximage-qt
+        manpages
         mc
         mkpasswd
         mktorrent
@@ -633,6 +643,8 @@ in
         smplayer
         skype
         sox
+        spice
+        win-spice
         sqlite
         sqlitebrowser
         sshpass
@@ -648,7 +660,6 @@ in
         sysstat
         system_config_printer
         teamspeak_client
-        teamviewer
         tesseract
         thunderbird
         tmux
@@ -668,23 +679,20 @@ in
         wireshark
         xpdf    # provides pdftotext
         zip
-#        (pkgs.callPackage /home/hyper/Desktop/git-repos/pastesl/pastesl.nix {})
+
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pastesl/master/pastesl.nix") {})
-#        (pkgs.callPackage /home/hyper/Desktop/git-repos/pdfForts/pdfForts.nix {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
-#        (pkgs.callPackage /home/hyper/Desktop/git-repos/jusLinkComposer/jusLinkComposer.nix {})        
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/jusLinkComposer/master/jusLinkComposer.nix") {})
-        # Master PDF Editor
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/master-pdf-editor.nix") {})
-        # getTechDetails - script for collecting the tech details when bug reporting
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/getTechDetails.nix") {})
-        # *Resilver - script that automatically resilver attached drives with the zpool or sets them to offline during powering down
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/autoResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/stopResilver.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/batchsigner.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/freeCache.nix") {})
         # wgDebug - needed for wg debugging
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgDebug.nix") {})
-        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/batchsigner.nix {})
 
+        (python3Packages.callPackage /home/hyper/Desktop/git-repos/OCRmyPDF/ocrmypdf.nix {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
