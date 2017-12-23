@@ -407,7 +407,8 @@ in
     # Enable libvirtd daemon
     virtualisation.libvirtd = {
         enable = true;
-        enableKVM = true;
+#        enableKVM = true;
+        qemuPackage = pkgs.qemu_kvm;
     };
     services.spice-vdagentd.enable = true;
     # Make smartcard reader and label printer accessible to everyone, so they can be passed to the VM
