@@ -70,7 +70,7 @@ in
     boot.loader.grub.enable = true;
     boot.loader.grub.version = 2;
     # Define on which hard drive you want to install Grub.
-    boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
+    boot.loader.grub.devices = [ "/dev/sda" "/dev/sdb" ]; # or "nodev" for efi only
 
 
     # Load additional hardware stuff
@@ -314,7 +314,7 @@ in
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
             "30 * * * * ${mySecrets.user} pass git pull"
             "40 * * * * ${mySecrets.user} pass git push"
-            "*/5 * * * * root autoResilver 'tank' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0-part1'"
+            "*/5 * * * * root autoResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
         ];
     };
 
@@ -695,7 +695,8 @@ in
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgDebug.nix") {})
 
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/batchsigner.nix") {})
-        (python3Packages.callPackage /home/hyper/Desktop/git-repos/OCRmyPDF/ocrmypdf.nix {})
+#        (python3Packages.callPackage /home/hyper/Desktop/git-repos/OCRmyPDF/ocrmypdf.nix {})
+        (python3Packages.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/ocrmypdf.nix") {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})

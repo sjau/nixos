@@ -15,27 +15,27 @@
   boot.blacklistedKernelModules = [ "nouveau" ];
 
   fileSystems."/" =
-    { device = "tank/encZFS/Nixos";
+    { device = "tankSubi/encZFS/Nixos";
       fsType = "zfs";
     };
 
   fileSystems."/mnt/encZFS/Media" =
-    { device = "tank/encZFS/Media";
+    { device = "tankSubi/encZFS/Media";
       fsType = "zfs";
     };
 
   fileSystems."/mnt/encZFS/VMs" =
-    { device = "tank/encZFS/VMs";
+    { device = "tankSubi/encZFS/VMs";
       fsType = "zfs";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/81c7ba48-71dd-4060-8abe-5c5bcd5b4edc";
+    { device = "/dev/disk/by-uuid/9bcbc94c-0cf5-4196-8743-30cff4da376a";
       fsType = "ext4";
     };
 
   swapDevices = [ ];
 
   nix.maxJobs = lib.mkDefault 4;
-  powerManagement.cpuFreqGovernor = "powersave";
+#  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
 }
