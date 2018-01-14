@@ -33,6 +33,11 @@ in
     assert mySecrets.wg_home_allowed != "";
     assert mySecrets.wg_home_end     != "";
     assert mySecrets.wg_home_pubkey  != "";
+    ## Office VPN
+    assert mySecrets.wg_office_ips     != "";
+    assert mySecrets.wg_office_allowed != "";
+    assert mySecrets.wg_office_end     != "";
+    assert mySecrets.wg_office_pubkey  != "";
 
 {
     imports =
@@ -70,7 +75,10 @@ in
     boot.loader.grub.enable = true;
     boot.loader.grub.version = 2;
     # Define on which hard drive you want to install Grub.
-    boot.loader.grub.devices = [ "/dev/sda" "/dev/sdb" ]; # or "nodev" for efi only
+    boot.loader.grub.devices = [
+        "/dev/disk/by-id/ata-Samsung_SSD_850_PRO_1TB_S2BBNWAHC23186P"
+        "/dev/disk/by-id/ata-Samsung_SSD_850_EVO_M.2_1TB_S33ENX0J201245E"
+    ]; # or "nodev" for efi only
 
 
     # Load additional hardware stuff
@@ -315,17 +323,21 @@ in
             "30 * * * * ${mySecrets.user} pass git pull"
             "40 * * * * ${mySecrets.user} pass git push"
             "*/5 * * * * root autoResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
+            "*/5 * * * * root wgStartFix 'wg_home wg_office'"
+            "0 3,9,15,21 * * * root /root/zfs_all"      # Backup rp, ks and ns99
         ];
     };
 
     systemd.services.stopResilver = {
         description = "Stop Resilvering / Mirroring upon powering down";
-        wantedBy = [ "multi-user.target" ];
-        bindsTo = [ "multi-user.target" ];
+        after = [ "zfs.target" ];
+        wantedBy = [ "zfs.target" ];
+#        wantedBy = [ "multi-user.target" ];
+#        bindsTo = [ "multi-user.target" ];
         serviceConfig = {
             Type = "oneshot";
             ExecStart = "/run/current-system/sw/bin/true";
-            ExecStop = "/run/current-system/sw/bin/stopResilver 'tank' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0-part1'";
+            ExecStop = "/run/current-system/sw/bin/stopResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0 usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'";
             RemainAfterExit = true;
         };
     };
@@ -400,6 +412,28 @@ in
                 publicKey = "${mySecrets.wg_home_pubkey}";
                 persistentKeepalive = 25;
             } ];
+        };
+        wg_office = {
+            ips = [ "${mySecrets.wg_office_ips}" ];
+            privateKey = "${mySecrets.wg_priv_key}";
+            peers = [ {
+                allowedIPs = [ "${mySecrets.wg_office_allowed}" ];
+                endpoint = "${mySecrets.wg_office_end}";
+                publicKey = "${mySecrets.wg_office_pubkey}";
+                persistentKeepalive = 25;
+            } ];
+            postSetup = [
+                # Set Nameserver
+                #"/run/current-system/sw/bin/bash -c 'printf \"nameserver 10.20.10.1\" | /run/current-system/sw/bin/resolvconf -a wg_office -m 0'"
+                # Set Route to WG-Server
+                #"/run/current-system/sw/bin/bash -c 'remoteIP=$(getent servi.home.sjau.ch); remoteIP=${remoteIP% *}; echo "$remoteIP" /tmp/remIP.txt '"
+            ];
+            postShutdown = [
+                # Remove Route to WG-Server
+                #
+                # Remove Nameserver
+                #${pkgs.openresolv}/bin/resolvconf -d wg_office
+            ];
         };
     };
 
@@ -570,6 +604,7 @@ in
 # KDE 5
         ark
         dolphin
+        kdenlive    frei0r  # frei0r provides transition effects
         kdeFrameworks.kdesu
         kdevelop
         k3b
@@ -602,12 +637,13 @@ in
         mplayer
         mpv
         ms-sys
-        mumble
 #         mupdf
         netcat-gnu
-        nmap
+        nix-index
+        nix-info
 #        nix-index # provides nix-locate
         nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
+        nmap
         nox     # Easy search for packages
         nss
         nssTools
@@ -682,6 +718,27 @@ in
         wireshark
         xpdf    # provides pdftotext
         zip
+        # RNN
+        torch
+        torchPackages.luarocks
+        python27
+        python27Packages.cython
+        python27Packages.numpy
+        python27Packages.ConfigArgParse
+        python27Packages.h5py
+        python27Packages.six
+        python27Packages.pytorch
+        python27Packages.torchvision
+        torch-hdf5
+        torchPackages.cwrap
+        torchPackages.paths
+#        torchPackages.nn
+#        torchPackages.nngraph
+        torchPackages.optim
+        python27Packages.pip
+        python27Packages.setuptools
+        cmake
+        gcc
 
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pastesl/master/pastesl.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
@@ -691,12 +748,17 @@ in
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/autoResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/stopResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/freeCache.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgStartFix.nix") {})
+
         # wgDebug - needed for wg debugging
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgDebug.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgRouteAdd.nix") {})
 
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/batchsigner.nix") {})
 #        (python3Packages.callPackage /home/hyper/Desktop/git-repos/OCRmyPDF/ocrmypdf.nix {})
         (python3Packages.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/ocrmypdf.nix") {})
+
+#        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/bennofs/nix-index/master/default.nix") {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
 #        (pkgs.callPackage ./suisseid-pkcs11.nix {})
