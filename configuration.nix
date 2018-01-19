@@ -59,7 +59,7 @@ in
     };
     services.zfs.autoScrub = {
         enable = true;
-        interval = "daily";
+        interval = "monthly";
         pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
     };
     # Limit ARC size to max. 4 GB, otherwise qemu is unhappy
@@ -143,6 +143,8 @@ in
     # Trust hydra. Needed for one-click installations.
     nix.trustedBinaryCaches = [ "http://hydra.nixos.org" ];
 
+
+
     # Setup networking
     networking = {
         # Disable IPv6
@@ -172,6 +174,7 @@ in
 
             # Get ad server list from: https://pgl.yoyo.org/adservers/
             ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"; })}
+            127.0.0.1       protectedinfoext.biz
         '';
     };
 
@@ -280,7 +283,7 @@ in
 
 
     # Enable Virtualbox
-#    virtualisation.virtualbox.host.enable = true;
+    virtualisation.virtualbox.host.enable = true;
 #    boot.kernelPackages = pkgs.linuxPackages_testing // {  # use bleeding edge kernel
     boot.kernelPackages = pkgs.linuxPackages_latest; # use latest kernel
 #    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
@@ -706,8 +709,9 @@ in
         unrar
         unzip
         usbutils
-        virtmanager
         virt-viewer
+        virtmanager
+        virtualbox
         vlc
         wget
         which
