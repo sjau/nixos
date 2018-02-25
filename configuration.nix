@@ -89,6 +89,7 @@ in
         pulseaudio.enable = true;
         opengl.driSupport32Bit = true;  # Required for Steam
         pulseaudio.support32Bit = true; # Required for Steam
+        bluetooth.enable = true;
     };
 
     # Filsystem and remote dirs - thx to sphalerite, clever and Shados
@@ -169,8 +170,8 @@ in
 
             10.10.11.7      vpn-data.jus-law.ch
 
-            81.4.108.20     juslawvpn
-            176.31.121.75   kimsufi
+            176.31.121.75   kimsufi ks.jus-law.ch
+            51.15.190.68    ons ons.jus-law.ch
 
             # Get ad server list from: https://pgl.yoyo.org/adservers/
             ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"; })}
@@ -327,7 +328,8 @@ in
             "40 * * * * ${mySecrets.user} pass git push"
             "*/5 * * * * root autoResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
             "*/5 * * * * root wgStartFix 'wg_home wg_office'"
-            "0 3,9,15,21 * * * root /root/zfs_all"      # Backup rp, ks and ns99
+            "10 3,9,15,21 * * * root /root/zfs_all"      # Backup rp, ks and ns99
+            "2 * * * * root /root/serviBackup"      # zfs send / receive
         ];
     };
 
@@ -468,7 +470,7 @@ in
             workgroup = WORKGROUP
             socket options = TCP_NODELAY IPTOS_LOWDELAY SO_KEEPALIVE
             security = user
-            name resolve order = hosts wins bcast
+#            name resolve order = hosts wins bcast
 #            wins support = yes
             guest account = hyper
             map to guest = bad user
@@ -556,6 +558,9 @@ in
         aspellDicts.en
         audacity
         bash-completion
+        bluedevil
+        bluez
+        bluez-tools
         chromium
         cifs_utils
         cdrtools
@@ -605,6 +610,7 @@ in
         jq
         jre
 # KDE 5
+        akregator
         ark
         dolphin
         kdenlive    frei0r  # frei0r provides transition effects
@@ -702,6 +708,7 @@ in
         sysstat
         system_config_printer
         teamspeak_client
+        telnet
         tesseract
         thunderbird
         tmux
@@ -722,27 +729,28 @@ in
         wireshark
         xpdf    # provides pdftotext
         zip
+
         # RNN
-        torch
-        torchPackages.luarocks
-        python27
-        python27Packages.cython
-        python27Packages.numpy
-        python27Packages.ConfigArgParse
-        python27Packages.h5py
-        python27Packages.six
-        python27Packages.pytorch
-        python27Packages.torchvision
-        torch-hdf5
-        torchPackages.cwrap
-        torchPackages.paths
+#        torch
+#        torchPackages.luarocks
+#        python27
+#        python27Packages.cython
+#        python27Packages.numpy
+#        python27Packages.ConfigArgParse
+#        python27Packages.h5py
+#        python27Packages.six
+#        python27Packages.pytorch
+#        python27Packages.torchvision
+#        torch-hdf5
+#        torchPackages.cwrap
+#        torchPackages.paths
 #        torchPackages.nn
 #        torchPackages.nngraph
-        torchPackages.optim
-        python27Packages.pip
-        python27Packages.setuptools
-        cmake
-        gcc
+#        torchPackages.optim
+#        python27Packages.pip
+#        python27Packages.setuptools
+#        cmake
+#        gcc
 
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pastesl/master/pastesl.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
@@ -760,7 +768,7 @@ in
 
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/batchsigner.nix") {})
 #        (python3Packages.callPackage /home/hyper/Desktop/git-repos/OCRmyPDF/ocrmypdf.nix {})
-        (python3Packages.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/ocrmypdf.nix") {})
+#        (python3Packages.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/ocrmypdf.nix") {})
 
 #        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/bennofs/nix-index/master/default.nix") {})
 

@@ -10,7 +10,8 @@
 
   boot.initrd.availableKernelModules = [ "hid" "xhci_hcd" "xhci_pci" "ahci" "usb_storage" "usbhid" "sd_mod" "sr_mod" "sdhci_pci" ];
   boot.kernelModules = [ "kvm-intel" ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.rtlwifi_new config.boot.kernelPackages.wireguard ];
+#  boot.extraModulePackages = [ config.boot.kernelPackages.rtlwifi_new config.boot.kernelPackages.wireguard ];
+  boot.extraModulePackages = [ config.boot.kernelPackages.wireguard ];
   # Deactivate discreet optimus/nvidia card
   boot.blacklistedKernelModules = [ "nouveau" ];
 
