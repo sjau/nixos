@@ -352,7 +352,7 @@ in
     # Setuid
     security.wrappers."mount.cifs".source = "${pkgs.cifs-utils}/bin/mount.cifs";
     security.wrappers."cdrecord".source = "${pkgs.cdrtools}/bin/cdrecord";
-
+    security.wrappers.spice-client-glib-usb-acl-helper.source = "${pkgs.spice_gtk}/bin/spice-client-glib-usb-acl-helper.real";
 
     # Enable sudo
     security.sudo = {
@@ -527,6 +527,9 @@ in
     # Add the NixOS Manual on virtual console 8
     services.nixosManual.showManual = true;
 
+    # Setup bash completion
+    programs.bash.enableCompletion = true;
+
 
     # Setup nano
     programs.nano.nanorc = ''
@@ -692,6 +695,7 @@ in
         skype
         sox
         spice
+        spice-gtk
         win-spice
         sqlite
         sqlitebrowser
@@ -730,27 +734,8 @@ in
         xpdf    # provides pdftotext
         zip
 
-        # RNN
-#        torch
-#        torchPackages.luarocks
-#        python27
-#        python27Packages.cython
-#        python27Packages.numpy
-#        python27Packages.ConfigArgParse
-#        python27Packages.h5py
-#        python27Packages.six
-#        python27Packages.pytorch
-#        python27Packages.torchvision
-#        torch-hdf5
-#        torchPackages.cwrap
-#        torchPackages.paths
-#        torchPackages.nn
-#        torchPackages.nngraph
-#        torchPackages.optim
-#        python27Packages.pip
-#        python27Packages.setuptools
-#        cmake
-#        gcc
+
+        (python27Packages.callPackage /home/hyper/Desktop/git-repos/nix-expressions/sqlalchemy-1.1.10.nix {})
 
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pastesl/master/pastesl.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
