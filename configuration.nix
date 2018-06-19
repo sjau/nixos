@@ -286,7 +286,7 @@ in
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
 #    boot.kernelPackages = pkgs.linuxPackages_testing // {  # use bleeding edge kernel
-    boot.kernelPackages = pkgs.linuxPackages_latest; # use latest kernel
+#    boot.kernelPackages = pkgs.linuxPackages_latest; # use latest kernel
 #    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
 #    boot.kernelPackages = pkgs.linuxPackages // {
 #        virtualbox = pkgs.linuxPackages.virtualbox.override {
@@ -454,6 +454,7 @@ in
     services.udev.extraRules = ''
         SUBSYSTEM=="usb", ATTR{idVendor}=="072f", ATTR{idProduct}=="90cc", GROUP="users", MODE="0777"
         SUBSYSTEM=="usb", ATTR{idVendor}=="04f9", ATTR{idProduct}=="2043", GROUP="users", MODE="0777"
+        KERNEL=="zd*", SUBSYSTEM=="block", GROUP="users", MODE="0660"
     '';
 
 
@@ -536,14 +537,14 @@ in
         set nowrap
         set tabstospaces
         set tabsize 4
-        set const
+        set constantshow
         # include /usr/share/nano/sh.nanorc
     '';
 
 
     # The NixOS release to be compatible with for stateful data such as databases.
     # It will e.g. upgrade databases to newer versions and that can't be reverted by Nixos.
-    system.stateVersion = "18.03";
+    system.nixos.stateVersion = "18.03";
 
     nixpkgs.config.allowUnfree = true;
     nixpkgs.config.chromium = {
@@ -645,7 +646,7 @@ in
         mc
         mkpasswd
         mktorrent
-        monodevelop
+#        monodevelop
         mplayer
         mpv
         ms-sys
@@ -731,11 +732,10 @@ in
         winetricks
         wireguard
         wireshark
+        woeusb
         xpdf    # provides pdftotext
         zip
 
-
-        (python27Packages.callPackage /home/hyper/Desktop/git-repos/nix-expressions/sqlalchemy-1.1.10.nix {})
 
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pastesl/master/pastesl.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
