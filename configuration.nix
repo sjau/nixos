@@ -63,10 +63,10 @@ in
         pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
     };
     # Limit ARC size to max. 4 GB, otherwise qemu is unhappy
-#    boot.extraModprobeConfig = ''
+    boot.extraModprobeConfig = ''
 #        options zfs zfs_arc_min=508185728
-#        options zfs zfs_arc_min=4294967296
-#    '';
+        options zfs zfs_arc_max=4294967296
+    '';
 
     # Add memtest86
     boot.loader.grub.memtest86.enable = true;
@@ -604,7 +604,7 @@ in
         iftop
         imagemagick
 #        inetutils  # problems with whois, so use iputils and whois instead
-        inkscape
+#        inkscape
         iosevka
         iotop
         iperf
@@ -619,7 +619,7 @@ in
         dolphin
         kdenlive    frei0r  # frei0r provides transition effects
         kdeFrameworks.kdesu
-        kdevelop
+#        kdevelop
         k3b
         kate
         kcalc
@@ -664,7 +664,7 @@ in
         opensc
         openssl
         openvpn
-        palemoon
+#        palemoon
         parted
         (pass pkgs)
         patchelf
@@ -693,7 +693,7 @@ in
         simplescreenrecorder
         smartmontools
         smplayer
-        skype
+#        skype
         sox
         spice
         spice-gtk
