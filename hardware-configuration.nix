@@ -10,7 +10,7 @@
 
   boot.initrd.availableKernelModules = [ "hid" "xhci_hcd" "xhci_pci" "ahci" "usb_storage" "usbhid" "sd_mod" "sr_mod" "sdhci_pci" ];
   boot.kernelModules = [ "kvm-intel" ];
-  boot.kernelParams = [ "zfs.zfs_arc_max=6442450944" ];
+  boot.kernelParams = [ "zfs.zfs_arc_max=6442450944" "boot.debug1devices" ];
 #  boot.extraModulePackages = [ config.boot.kernelPackages.rtlwifi_new config.boot.kernelPackages.wireguard ];
   boot.extraModulePackages = [ config.boot.kernelPackages.wireguard ];
   # Deactivate discreet optimus/nvidia card

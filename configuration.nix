@@ -286,7 +286,7 @@ in
     # Enable Virtualbox
     virtualisation.virtualbox.host.enable = true;
 #    boot.kernelPackages = pkgs.linuxPackages_testing // {  # use bleeding edge kernel
-#    boot.kernelPackages = pkgs.linuxPackages_latest; # use latest kernel
+    boot.kernelPackages = pkgs.linuxPackages_latest; # use latest kernel
 #    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
 #    boot.kernelPackages = pkgs.linuxPackages // {
 #        virtualbox = pkgs.linuxPackages.virtualbox.override {
