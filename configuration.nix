@@ -63,10 +63,10 @@ in
         pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
     };
     # Limit ARC size to max. 4 GB, otherwise qemu is unhappy
-    boot.extraModprobeConfig = ''
+#    boot.extraModprobeConfig = ''
 #        options zfs zfs_arc_min=508185728
-        options zfs zfs_arc_max=4294967296
-    '';
+#        options zfs zfs_arc_max=4294967296
+#    '';
 
     # Add memtest86
     boot.loader.grub.memtest86.enable = true;
@@ -84,9 +84,10 @@ in
     # Load additional hardware stuff
     hardware = {
         # Hardware settings
-#        cpu.intel.updateMicrocode = true;
+        cpu.intel.updateMicrocode = true;
         enableAllFirmware = true;
         pulseaudio.enable = true;
+        pulseaudio.package = pkgs.pulseaudioFull;
         opengl.driSupport32Bit = true;  # Required for Steam
         pulseaudio.support32Bit = true; # Required for Steam
         bluetooth.enable = true;
@@ -544,7 +545,7 @@ in
 
     # The NixOS release to be compatible with for stateful data such as databases.
     # It will e.g. upgrade databases to newer versions and that can't be reverted by Nixos.
-    system.nixos.stateVersion = "18.03";
+    system.stateVersion = "18.09";
 
     nixpkgs.config.allowUnfree = true;
     nixpkgs.config.chromium = {
@@ -655,7 +656,7 @@ in
         nix-index
         nix-info
 #        nix-index # provides nix-locate
-        nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
+#        nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
         nmap
         nox     # Easy search for packages
         nss
@@ -740,12 +741,15 @@ in
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pastesl/master/pastesl.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/jusLinkComposer/master/jusLinkComposer.nix") {})
-        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/master-pdf-editor.nix") {})
+#        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/master-pdf-editor.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/getTechDetails.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/autoResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/stopResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/freeCache.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgStartFix.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/deda.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/checkHosts.nix") {})
+        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/checkVersion.nix") {})
 
         # wgDebug - needed for wg debugging
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgDebug.nix") {})
