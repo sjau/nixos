@@ -156,11 +156,14 @@ in
         #  enable = true;  # Enables wireless. Disable when using network manager
         networkmanager.enable = true;
         firewall.allowPing = true;
-        firewall.allowedUDPPorts = [ 5000 5001 21025 21026 22000 22026 ];
-        firewall.allowedTCPPorts = [ 5000 5001 22000 ];
+        firewall.allowedUDPPorts = [ 5000 5001 21025 21026 22000 22026 5959 45000 ];
+        firewall.allowedTCPPorts = [ 5000 5001 22000 5959 45000 ];
         # Netcat: 5000
         # IPerf: 5001
         # Syncthing: 21025 21026 22000 22026
+        # SPICE/VNC: 5900
+        # WebProxify: 5959
+        # nginx: 4500
         extraHosts = ''
             188.40.139.2    ns99
             10.8.0.8        ns
@@ -169,6 +172,7 @@ in
             10.8.20.79      raspimam
             10.8.20.80      mam
 
+            10.0.0.19       subi.home.sjau.ch subi
             10.10.11.7      vpn-data.jus-law.ch
 
             176.31.121.75   kimsufi ks.jus-law.ch
@@ -243,7 +247,7 @@ in
 
     # Enable apache
     services.httpd = {
-        enable = true;
+        enable = false;
         documentRoot = "/var/www/web";
         adminAddr = "admin@localhost";
         extraModules = [{
@@ -269,6 +273,36 @@ in
         '';
     };
 
+
+    services.nginx = {
+        enable = true;
+        virtualHosts."subi.home.sjau.ch" = {
+            forceSSL = true;
+            root = "/var/www/web/spice-html5";
+            locations."/".index = "index.php index.html index.htm spice.html";
+            locations."/".extraConfig = ''
+                auth_basic "Restricted Content";
+                auth_basic_user_file /var/www/web/.htpasswd;
+            '';
+            locations."/websockify" = {
+                proxyWebsockets = true;
+                proxyPass = "https://localhost:5959";
+            };
+            sslCertificate = "/https-cert.pem";
+            sslCertificateKey = "/https-key.pem";
+            listen =[ { addr = "*"; port = 45000; ssl = true; } ];
+        };
+    };
+    services.phpfpm.poolConfigs.mypool = ''
+        listen = 127.0.0.1:9000
+        user = nobody
+        pm = dynamic
+        pm.max_children = 5
+        pm.start_servers = 2
+        pm.min_spare_servers = 1
+        pm.max_spare_servers = 3
+        pm.max_requests = 500
+    '';
 
     # Enable mysql
 #    services.mysql = {
@@ -331,6 +365,7 @@ in
             "*/5 * * * * root wgStartFix 'wg_home wg_office'"
             "10 3,9,15,21 * * * root /root/zfs_all"      # Backup rp, ks and ns99
             "2 * * * * root /root/serviBackup"      # zfs send / receive
+            "3 0 * * * root 0 0 * * * '/root/.acme.sh/acme.sh' --cron --home '/root/.acme.sh' > /dev/null"
         ];
     };
 
@@ -566,9 +601,11 @@ in
         bluedevil
         bluez
         bluez-tools
+        cargo
         chromium
         cifs_utils
         cdrtools
+        cmake
         conkeror
         coreutils
         cryptsetup
@@ -653,6 +690,7 @@ in
         ms-sys
 #         mupdf
         netcat-gnu
+        ninja
         nix-index
         nix-info
 #        nix-index # provides nix-locate
@@ -677,10 +715,12 @@ in
         php     # PHP-Cli
         pinentry
         pinentry_qt4
+        pkgconfig
         playonlinux
         poppler_utils # provides command_not_found
         pv
         python27Packages.youtube-dl
+        python36Packages.websockify
         psmisc
         pwgen
         qemu
@@ -691,6 +731,7 @@ in
         recode
         recoll
         rfkill
+        rustc
         simplescreenrecorder
         smartmontools
         smplayer
