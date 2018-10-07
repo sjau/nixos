@@ -14,30 +14,39 @@ let
 
 in
     # Check if custom vars are set
-    assert mySecrets.user            != "";
-    assert mySecrets.passwd          != "";
-    assert mySecrets.hashedpasswd    != "";
-    assert mySecrets.cifs            != "";
-    assert mySecrets.hostname        != "";
-    assert mySecrets.smbhome         != "";
-    assert mySecrets.smboffice       != "";
-    assert mySecrets.ibsuser         != "";
-    assert mySecrets.ibspass         != "";
-    assert mySecrets.ibsip           != "";
+    assert mySecrets.user               != "";
+    assert mySecrets.passwd             != "";
+    assert mySecrets.hashedpasswd       != "";
+    assert mySecrets.cifs               != "";
+    assert mySecrets.hostname           != "";
+    assert mySecrets.smbhome            != "";
+    assert mySecrets.smboffice          != "";
+    assert mySecrets.ibsuser            != "";
+    assert mySecrets.ibspass            != "";
+    assert mySecrets.ibsip              != "";
 
     # Wireguard
     ## Private Key
-    assert mySecrets.wg_priv_key     != "";
+    assert mySecrets.wg_priv_key        != "";
     ## Home VPN
-    assert mySecrets.wg_home_ips     != "";
-    assert mySecrets.wg_home_allowed != "";
-    assert mySecrets.wg_home_end     != "";
-    assert mySecrets.wg_home_pubkey  != "";
+    assert mySecrets.wg_home_ips        != "";
+    assert mySecrets.wg_home_allowed    != "";
+    assert mySecrets.wg_home_end        != "";
+    assert mySecrets.wg_home_pubkey     != "";
     ## Office VPN
-    assert mySecrets.wg_office_ips     != "";
-    assert mySecrets.wg_office_allowed != "";
-    assert mySecrets.wg_office_end     != "";
-    assert mySecrets.wg_office_pubkey  != "";
+    assert mySecrets.wg_office_ips      != "";
+    assert mySecrets.wg_office_allowed  != "";
+    assert mySecrets.wg_office_end      != "";
+    assert mySecrets.wg_office_pubkey   != "";
+
+    # SSMTP
+    assert mySecrets.ssmtp_mailto       != "";
+    assert mySecrets.ssmtp_user         != "";
+    assert mySecrets.ssmtp_pass         != "";
+    assert mySecrets.ssmtp_host         != "";
+    assert mySecrets.ssmtp_domain       != "";
+    assert mySecrets.ssmtp_root         != "";
+
 
 {
     imports =
@@ -54,6 +63,7 @@ in
 #    boot.zfs.devNodes = "/dev";
     services.zfs.autoSnapshot = {
         enable = true;
+        hourly = 720;
         #frequent = 9; # keep the latest eight 15-minute snapshots (instead of four)
         #monthly = 1;  # keep only one monthly snapshot (instead of twelve)
     };
@@ -110,13 +120,13 @@ in
         xsystemfs = "";
         localfs = "/mnt/home";
     };
-#    ibs = makeServer {
-#        remotefs = "${mySecrets.ibsip}";
-#        userfs = "${mySecrets.ibsuser}";
-#        passwordfs = "${mySecrets.ibspass}";
-#        xsystemfs = "openvpn-ibs.service";
-#        localfs = "/mnt/IBS";
-#    };
+    ibs = makeServer {
+        remotefs = "${mySecrets.ibsip}";
+        userfs = "${mySecrets.ibsuser}";
+        passwordfs = "${mySecrets.ibspass}";
+        xsystemfs = "openvpn-ibs.service";
+        localfs = "/mnt/IBS";
+    };
     office = makeServer {
         remotefs = "${mySecrets.smboffice}";
         userfs = "none";
@@ -126,7 +136,7 @@ in
     };
     in (builtins.listToAttrs (
         map home [ "Audio" "Shows" "SJ" "Video" "backup" "hyper" "eeePC" "rtorrent" ]
-#        ++ map ibs [ "ARCHIV" "DATEN" "INDIGO" "LEAD" "VERWALTUNG" "SCAN" ]
+        ++ map ibs [ "ARCHIV" "DATEN" "INDIGO" "LEAD" "VERWALTUNG" "SCAN" ]
         ++ [( office "Advo" )]))
     // {
         "/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
@@ -245,6 +255,19 @@ in
     };
 
 
+    # Setup a "sendmail"
+    networking.defaultMailServer = {
+        directDelivery = true;
+        authUser = "${mySecrets.ssmtp_user}";
+        authPass = "${mySecrets.ssmtp_pass}";
+        hostName = "${mySecrets.ssmtp_host}";
+        domain = "${mySecrets.ssmtp_domain}";
+        root = "${mySecrets.ssmtp_root}";
+        useSTARTTLS = true;
+        useTLS = true;
+    };
+
+
     # Enable apache
     services.httpd = {
         enable = false;
@@ -355,16 +378,17 @@ in
     # Enable cron
     services.cron = {
         enable = true;
+        mailto = "${mySecrets.ssmtp_mailto}";
         systemCronJobs = [
 #            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
             "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
             "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
-            "30 * * * * ${mySecrets.user} pass git pull"
-            "40 * * * * ${mySecrets.user} pass git push"
+            "30 * * * * ${mySecrets.user} pass git pull > /dev/null 2>&1"
+            "40 * * * * ${mySecrets.user} pass git push > /dev/null 2>&1"
             "*/5 * * * * root autoResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
-            "*/5 * * * * root wgStartFix 'wg_home wg_office'"
+            "*/5 * * * * root wgStartFix 'wg_home wg_office' > /dev/null 2>&1"
             "10 3,9,15,21 * * * root /root/zfs_all"      # Backup rp, ks and ns99
-            "2 * * * * root /root/serviBackup"      # zfs send / receive
+            "50 * * * * root /root/zfsBackup cron"      # zfs send / receive
             "3 0 * * * root 0 0 * * * '/root/.acme.sh/acme.sh' --cron --home '/root/.acme.sh' > /dev/null"
         ];
     };
@@ -438,7 +462,7 @@ in
         ks      = { config = '' config /root/.openvpn/ks/subi.conf ''; };
         rp      = { config = '' config /root/.openvpn/rp/client.conf ''; };
         hme-lan = { config = '' config /root/.openvpn/home-lan/subi.conf ''; };
-#        ibs     = { config = '' config /root/.openvpn/ibs/ibs.conf ''; };
+        ibs     = { config = '' config /root/.openvpn/ibs/ibs.conf ''; };
     };
 
 
@@ -671,6 +695,7 @@ in
         plasma-nm
         plasma-workspace
         spectacle # KSnapShot replacement for KDE 5
+        kdeApplications.kdialog
 # End of KDE 5
         kvm
         libreoffice
@@ -788,6 +813,9 @@ in
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/stopResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/freeCache.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgStartFix.nix") {})
+#        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/bottle-websocket.nix {})
+#        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/eel.nix {})
+#        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/deda.nix {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/deda.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/checkHosts.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/checkVersion.nix") {})
