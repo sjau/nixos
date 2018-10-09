@@ -604,7 +604,7 @@ in
 
     # The NixOS release to be compatible with for stateful data such as databases.
     # It will e.g. upgrade databases to newer versions and that can't be reverted by Nixos.
-    system.stateVersion = "18.09";
+    system.stateVersion = "19.03";
 
     nixpkgs.config.allowUnfree = true;
     nixpkgs.config.chromium = {
