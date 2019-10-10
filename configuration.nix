@@ -14,6 +14,11 @@ let
 
 in
     # Check if custom vars are set
+
+    # Auth SSH Key
+    assert mySecrets.auth_ssh_key1      != "";
+    assert mySecrets.auth_ssh_key2      != "";
+
     assert mySecrets.user               != "";
     assert mySecrets.passwd             != "";
     assert mySecrets.hashedpasswd       != "";
@@ -33,11 +38,21 @@ in
     assert mySecrets.wg_home_allowed    != "";
     assert mySecrets.wg_home_end        != "";
     assert mySecrets.wg_home_pubkey     != "";
-    ## Office VPN
-    assert mySecrets.wg_office_ips      != "";
-    assert mySecrets.wg_office_allowed  != "";
-    assert mySecrets.wg_office_end      != "";
-    assert mySecrets.wg_office_pubkey   != "";
+    ## Jus-Law VPN
+    assert mySecrets.wg_jl_ips          != "";
+    assert mySecrets.wg_jl_allowed      != "";
+    assert mySecrets.wg_jl_end          != "";
+    assert mySecrets.wg_jl_pubkey       != "";
+    ## h&b Data VPN
+    assert mySecrets.wg_hb_ips          != "";
+    assert mySecrets.wg_hb_allowed      != "";
+    assert mySecrets.wg_hb_end          != "";
+    assert mySecrets.wg_hb_pubkey       != "";
+    # ONS
+    assert mySecrets.wg_ons_ips         != "";
+    assert mySecrets.wg_ons_allowed     != "";
+    assert mySecrets.wg_ons_end         != "";
+    assert mySecrets.wg_ons_pubkey      != "";
 
     # SSMTP
     assert mySecrets.ssmtp_mailto       != "";
@@ -50,8 +65,10 @@ in
 
 {
     imports =
-        [ # Include the results of the hardware scan.
-        ./hardware-configuration.nix
+        [   # Include the results of the hardware scan.
+            ./hardware-configuration.nix
+            # Fix DisplayLink: see https://gist.github.com/eyJhb/b44a6de738965a3e895f456be2683b50  https://github.com/NixOS/nixpkgs/issues/62871
+            /root/DisplayLink/displaylink.nix
         ];
 
     # Use latest kernel
@@ -60,23 +77,11 @@ in
     # Add more filesystems
     boot.supportedFilesystems = [ "zfs" ];
     boot.zfs.enableUnstable = true;
-#    boot.zfs.devNodes = "/dev";
-    services.zfs.autoSnapshot = {
-        enable = true;
-        hourly = 720;
-        #frequent = 9; # keep the latest eight 15-minute snapshots (instead of four)
-        #monthly = 1;  # keep only one monthly snapshot (instead of twelve)
-    };
     services.zfs.autoScrub = {
         enable = true;
         interval = "monthly";
         pools = [ ]; # List of ZFS pools to periodically scrub. If empty, all pools will be scrubbed.
     };
-    # Limit ARC size to max. 4 GB, otherwise qemu is unhappy
-#    boot.extraModprobeConfig = ''
-#        options zfs zfs_arc_min=508185728
-#        options zfs zfs_arc_max=4294967296
-#    '';
 
     # Add memtest86
     boot.loader.grub.memtest86.enable = true;
@@ -89,6 +94,26 @@ in
         "/dev/disk/by-id/ata-Samsung_SSD_850_PRO_1TB_S2BBNWAHC23186P"
         "/dev/disk/by-id/ata-Samsung_SSD_850_EVO_M.2_1TB_S33ENX0J201245E"
     ]; # or "nodev" for efi only
+
+    # Remote ZFS Unlock
+    boot.initrd.network = {
+        enable = true;
+        ssh = {
+            enable = true;
+            port = 2222;
+            hostECDSAKey = /root/initrd-ssh-key;
+            authorizedKeys = [ "${mySecrets.auth_ssh_key1}" "${mySecrets.auth_ssh_key2}" ];
+        };
+        postCommands = ''
+            echo "zfs load-key -a; killall zfs" >> /root.profile
+        '';
+    };
+    boot.initrd.kernelModules = [ "r8169" "cdc_ncm" "xhci_hcd" "usbnet" "intel_xhci_usb_role_switch" "usbcore" "usb_common" ];
+#    boot.kernelParams = [ "ip=dhcp" ];
+        
+
+    # Clean /tmp at boot
+    boot.cleanTmpDir = true;
 
 
     # Load additional hardware stuff
@@ -110,42 +135,43 @@ in
         value = {
             device = "//${remotefs}/${name}";
             fsType = "cifs";
-            options = [ "noauto" "user" "uid=1000" "gid=100" "username=${userfs}" "password=${passwordfs}" "iocharset=utf8" "x-systemd.requires=${xsystemfs}" ];
+#            options = [ "noauto" "user" "uid=1000" "gid=100" "username=${userfs}" "password=${passwordfs}" "iocharset=utf8" "x-systemd.requires=${xsystemfs}" ];
+            options = [ "noauto" "user" "uid=1000" "gid=100" "username=${userfs}" "password=${passwordfs}" "iocharset=utf8" "x-systemd.automount" "x-systemd.idle-timeout=60" "x-systemd.device-timeout=5s" "x-systemd.mount-timeout=5s" ];
         };
     };
     home = makeServer {
         remotefs = "${mySecrets.smbhome}";
         userfs = "${mySecrets.user}";
         passwordfs = "${mySecrets.cifs}";
-        xsystemfs = "";
+        xsystemfs = "wireguard-wg_home.service";
         localfs = "/mnt/home";
     };
-    ibs = makeServer {
-        remotefs = "${mySecrets.ibsip}";
-        userfs = "${mySecrets.ibsuser}";
-        passwordfs = "${mySecrets.ibspass}";
-        xsystemfs = "openvpn-ibs.service";
-        localfs = "/mnt/IBS";
-    };
+#    ibs = makeServer {
+#        remotefs = "${mySecrets.ibsip}";
+#        userfs = "${mySecrets.ibsuser}";
+#        passwordfs = "${mySecrets.ibspass}";
+#        xsystemfs = "openvpn-ibs.service";
+#        localfs = "/mnt/IBS";
+#    };
     office = makeServer {
         remotefs = "${mySecrets.smboffice}";
         userfs = "none";
         passwordfs = "none";
-        xsystemfs = "openvpn-j-l.service";
+        xsystemfs = "wireguard-wg_jl.service";
         localfs = "/mnt/jus-law";
     };
     in (builtins.listToAttrs (
-        map home [ "Audio" "Shows" "SJ" "Video" "backup" "hyper" "eeePC" "rtorrent" ]
-        ++ map ibs [ "ARCHIV" "DATEN" "INDIGO" "LEAD" "VERWALTUNG" "SCAN" ]
+        map home [ "Audio" "Shows" "Video" "hyper" "Plex" ]
+#        ++ map ibs [ "ARCHIV" "DATEN" "INDIGO" "LEAD" "VERWALTUNG" "SCAN" ]
         ++ [( office "Advo" )]))
     // {
-        "/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
+#        "/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
         "/var/tmp" = { device = "tmpfs" ; fsType = "tmpfs"; };
     };
 
     # Create some folders
     system.activationScripts.media = ''
-        mkdir -m 0755 -p /mnt/home/{Audio,Shows,SJ,Video,backup,eeePC,hyper,rtorrent}
+        mkdir -m 0755 -p /mnt/home/{Audio,Shows,SJ,Video,backup,eeePC,hyper,rtorrent,Plex}
         mkdir -m 0755 -p /mnt/ibs/{ARCHIV,DATEN,INDIGO,LEAD,VERWALTUNG,SCAN}
         mkdir -m 0755 -p /mnt/jus-law/Advo
     '';
@@ -165,14 +191,16 @@ in
         hostId = "bac8c473";
         #  enable = true;  # Enables wireless. Disable when using network manager
         networkmanager.enable = true;
+        useDHCP = true;
         firewall.allowPing = true;
-        firewall.allowedUDPPorts = [ 5000 5001 21025 21026 22000 22026 5959 45000 ];
-        firewall.allowedTCPPorts = [ 5000 5001 22000 5959 45000 ];
+        firewall.allowedUDPPorts = [ 2222 5000 5001 21025 21026 21027 22000 22026 5959 45000 8384 5900 ];
+        firewall.allowedTCPPorts = [ 2222 5000 5001 21027 22000 5959 45000 6080 8384 5900 ];
+        # Early SSH / initrd
         # Netcat: 5000
         # IPerf: 5001
-        # Syncthing: 21025 21026 22000 22026
+        # Syncthing: 21025 21026 21027 22000 22026 - WUI: 8384
         # SPICE/VNC: 5900
-        # WebProxify: 5959
+        # WebSockify: 5959
         # nginx: 4500
         extraHosts = ''
             188.40.139.2    ns99
@@ -182,21 +210,29 @@ in
             10.8.20.79      raspimam
             10.8.20.80      mam
 
-            10.0.0.19       subi.home.sjau.ch subi
+            127.0.0.1       subi.home.sjau.ch subi
             10.10.11.7      vpn-data.jus-law.ch
+            10.10.20.7      wg-data.jus-law.ch
+
+            10.100.200.7    vpn-data.heer-baumgartner.ch
 
             176.31.121.75   kimsufi ks.jus-law.ch
             51.15.190.68    ons ons.jus-law.ch
 
-            # Get ad server list from: https://pgl.yoyo.org/adservers/
-            ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"; })}
-            127.0.0.1       protectedinfoext.biz
+            # Get Ad/Tracking server list from https://github.com/sjau/adstop
+            ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "https://raw.githubusercontent.com/sjau/adstop/master/hosts"; })}
+            0.0.0.0       protectedinfoext.biz
         '';
     };
 
+# ${builtins.readFile (builtins.fetchurl { name = "blocked_hosts.txt"; url = "https://raw.githubusercontent.com/sjau/adstop/master/hosts"; })}
 
-    # Make /etc/hosts writeable
-    #environment.etc."hosts".mode = "0644";
+    # Resolved - DNS Server
+#    services.resolved = {
+#        enable = true;
+#        fallbackDns = [ "10.0.0.1" "10.10.10.1" "10.100.100.1" "8.8.4.4" "8.8.8.8" ];
+#    };
+
 
     # Enable dbus
     services.dbus.enable = true;
@@ -229,11 +265,12 @@ in
     # Enable the X11 windowing system.
     services.xserver = {
         enable = true;
-        videoDrivers = [ "intel" ];
+        videoDrivers = [ "intel" "modesetting" "displaylink" ];
+#        videoDrivers = [ "intel" "modesetting" ];
         layout = "ch";
         xkbOptions = "eurosign:e";
         synaptics = {
-            enable = true;
+            enable = false;
         };
 
         # Enable the KDE Desktop Environment.
@@ -296,36 +333,54 @@ in
         '';
     };
 
+#    services.networking.websockify = {
+#        enable = true;
+#        sslCert = "/https-cert.pem";
+#        sslKey = "/https-key.pem";
+#        portMap = {
+#            "5959" = 5900;
+#        };
+#    };
 
     services.nginx = {
         enable = true;
         virtualHosts."subi.home.sjau.ch" = {
             forceSSL = true;
-            root = "/var/www/web/spice-html5";
-            locations."/".index = "index.php index.html index.htm spice.html";
-            locations."/".extraConfig = ''
-                auth_basic "Restricted Content";
-                auth_basic_user_file /var/www/web/.htpasswd;
-            '';
-            locations."/websockify" = {
+            root = "/var/www/";
+            locations."/spice/" = {
+                index = "index.php index.html index.htm spice.html";
+            };
+            locations."/websockify/" = {
                 proxyWebsockets = true;
-                proxyPass = "https://localhost:5959";
+                proxyPass = "https://127.0.0.1:5959";
+                extraConfig = ''
+                    # VNC connection timeout
+                    proxy_read_timeout 61s;
+
+                    # Disable cache
+                    proxy_buffering off;
+                '';
             };
             sslCertificate = "/https-cert.pem";
             sslCertificateKey = "/https-key.pem";
             listen =[ { addr = "*"; port = 45000; ssl = true; } ];
         };
     };
-    services.phpfpm.poolConfigs.mypool = ''
-        listen = 127.0.0.1:9000
-        user = nobody
-        pm = dynamic
-        pm.max_children = 5
-        pm.start_servers = 2
-        pm.min_spare_servers = 1
-        pm.max_spare_servers = 3
-        pm.max_requests = 500
-    '';
+    services.phpfpm.pools = {
+        mypool = {
+            listen = "127.0.0.1:9000";
+            phpPackage = pkgs.php;
+            user = "nobody";
+            extraConfig = ''
+                pm = dynamic
+                pm.max_children = 5
+                pm.start_servers = 2
+                pm.min_spare_servers = 1
+                pm.max_spare_servers = 3
+                pm.max_requests = 500
+            '';
+        };
+    };
 
     # Enable mysql
 #    services.mysql = {
@@ -342,18 +397,22 @@ in
 
 
     # Enable Virtualbox
-    virtualisation.virtualbox.host.enable = true;
-#    boot.kernelPackages = pkgs.linuxPackages_testing // {  # use bleeding edge kernel
-    boot.kernelPackages = pkgs.linuxPackages_latest; # use latest kernel
-#    boot.kernelPackages = pkgs.linuxPackages_latest // {  # use latest kernel
-#    boot.kernelPackages = pkgs.linuxPackages // {
-#        virtualbox = pkgs.linuxPackages.virtualbox.override {
+#    virtualisation.virtualbox = {
+#        host = {
+#            enable = true;
 #            enableExtensionPack = true;
-#            pulseSupport = true;
 #        };
+#        guest.enable = true;
 #    };
-#    nixpkgs.config.virtualbox.enableExtensionPack = true;
+    boot = {
+        kernelPackages = pkgs.linuxPackages_latest;
+    };
 
+
+    # Enable Docker
+    virtualisation.docker = {
+        enable = true;
+    };
 
     # Enable Avahi for local domain resoltuion
     services.avahi = {
@@ -374,22 +433,58 @@ in
         servers = [ "0.ch.pool.ntp.org" "1.ch.pool.ntp.org" "2.ch.pool.ntp.org" "3.ch.pool.ntp.org" ];
     };
 
+    # Custom files in /etc
+    environment.etc = {
+        "easysnap/easysnap.hourly".text = ''
+            # Format: local ds ; local encryption ds ; raw sending ; intermediay sending; export pool; remote user@host ; remote ds ; number of snapshots ; free disk warning
+
+            # Servi
+            tankServers/encZFS/home-server/Nixos;tankServers/encZFS;;y;y;root@10.200.0.1;tankServi/encZFS/Nixos;4380;200
+            tankServers/encZFS/home-server/Media;tankServers/encZFS;;y;y;root@10.200.0.1;tankServi/encZFS/Media;4380;200
+            tankMediaBU/encZFS/Plex;tankMediaBU/encZFS;;y;y;root@servi.home.sjau.ch;tankMedia/encZFS/Plex;4380;100
+
+            # Remote Servers
+            tankServers/encZFS/online-net-server;tankServers/encZFS;;y;y;root@ons.jus-law.ch;tankOnline/encZFS/Nixos;4380;200
+            tankServers/encZFS/ovh-cloud-ssd-server;tankServers/encZFS;;y;y;root@ov.jus-law.ch;tankOVH/encZFS/Nixos;4380;200
+
+            # Roleplayer Server
+            tankServers/encZFS/roleplayer-server/Debian;;;y;y;root@ispc.roleplayer.org;tankRP/Debian;2190;200
+            tankServers/encZFS/roleplayer-server/Debian/home;;;y;y;root@ispc.roleplayer.org;tankRP/Debian/home;2190;200
+            tankServers/encZFS/roleplayer-server/Debian/var;;;y;y;root@ispc.roleplayer.org;tankRP/Debian/var;2190;200
+            tankServers/encZFS/roleplayer-server/Debian/var/vmail;;;y;y;root@ispc.roleplayer.org;tankRP/Debian/var/vmail;2190;200
+            tankServers/encZFS/roleplayer-server/Debian/var/www;;;y;y;root@ispc.roleplayer.org;tankRP/Debian/var/www;2190;200
+            tankServers/encZFS/roleplayer-server/manager.roleplayer.org;;;y;y;root@ispc.roleplayer.org;tankRP/manager.roleplayer.org;2190;200
+        '';
+        "easysnap/easysnap.hourly".mode = "0644";
+        # Make /etc/hosts writeable
+        "hosts".mode = "0644";
+    };
 
     # Enable cron
     services.cron = {
         enable = true;
         mailto = "${mySecrets.ssmtp_mailto}";
         systemCronJobs = [
+            # Make sure network card is set to 1gpbs
+            "*/5 * * * *    root    ethtool -s enp2s0f1 autoneg on"
+            # Run ZFS Trim every night
+            "1 23 * * *     root    zpool trim tankSubi"
 #            "0 3,9,15,21 * * * root /root/fstrim.sh >> /tmp/fstrim.txt 2>&1"
-            "0 2 * * * root /root/backup.sh >> /tmp/backup.txt 2>&1"
-            "0 */6 * * * root /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
-            "30 * * * * ${mySecrets.user} pass git pull > /dev/null 2>&1"
-            "40 * * * * ${mySecrets.user} pass git push > /dev/null 2>&1"
-            "*/5 * * * * root autoResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0, usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
-            "*/5 * * * * root wgStartFix 'wg_home wg_office' > /dev/null 2>&1"
-            "10 3,9,15,21 * * * root /root/zfs_all"      # Backup rp, ks and ns99
-            "50 * * * * root /root/zfsBackup cron"      # zfs send / receive
-            "3 0 * * * root 0 0 * * * '/root/.acme.sh/acme.sh' --cron --home '/root/.acme.sh' > /dev/null"
+            "0 2 * * *      root    /root/backup.sh >> /tmp/backup.txt 2>&1"
+            "0 */6 * * *    root    /root/ssd_level_wear.sh >> /tmp/ssd_level_wear.txt 2>&1"
+            "30 * * * *     ${mySecrets.user}   pass git pull > /dev/null 2>&1"
+            "40 * * * *     ${mySecrets.user}   pass git push > /dev/null 2>&1"
+            "*/5 * * * *    root    autoResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0'"
+            "*/5 22-03 * * * root   autoResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
+            "25 4 * * *     root    stopResilver 'tankSubi' 'usb-TOSHIBA_External_USB_3.0_20170612010552F-0:0 usb-TOSHIBA_External_USB_3.0_2012110725463-0:0'"
+            "3 0 * * *      root    '/root/.acme.sh/acme.sh' --cron --home '/root/.acme.sh' > /dev/null"
+            ### Easy Snap
+            "*/15 * * * *   root    /home/hyper/Desktop/git-repos/easysnap/easysnap frequent"
+            "0 * * * *      root    /home/hyper/Desktop/git-repos/easysnap/easysnap hourly"
+            "0 0 * * *      root    /home/hyper/Desktop/git-repos/easysnap/easysnap daily"
+            "0 0 * * 1      root    /home/hyper/Desktop/git-repos/easysnap/easysnap weekly"
+            "0 0 1 * *      root    /home/hyper/Desktop/git-repos/easysnap/easysnap monthly"
+            "35 * * * *     root    /home/hyper/Desktop/git-repos/easysnap/easysnapRecv hourly"
         ];
     };
 
@@ -408,6 +503,14 @@ in
     };
     systemd.services.stopResilver.enable = true;
 
+    
+#    systemd.services.wireguard-wg_home.serviceConfig.Restart = "on-failure";
+#    systemd.services.wireguard-wg_home.serviceConfig.RestartSec = "5s";
+#    systemd.services.wireguard-wg_jl.serviceConfig.Restart = "on-failure";
+#    systemd.services.wireguard-wg_jl.serviceConfig.RestartSec = "5s";
+#    systemd.services.wireguard-wg_ons.serviceConfig.Restart = "on-failure";
+#    systemd.services.wireguard-wg_ons.serviceConfig.RestartSec = "5s";
+    
 
     # Setuid
     security.wrappers."mount.cifs".source = "${pkgs.cifs-utils}/bin/mount.cifs";
@@ -426,7 +529,7 @@ in
     users.extraUsers.${mySecrets.user} = {
         isNormalUser = true;    # creates home, adds to group users, sets default shell
         description = "${mySecrets.user}";
-        extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" "cdrom" "kvm" "libvirtd" ]; # wheel is for the sudo group
+        extraGroups = [ "networkmanager" "vboxusers" "wheel" "audio" "cdrom" "kvm" "libvirtd" "adbusers" "docker" ]; # wheel is for the sudo group
         uid = 1000;
         initialHashedPassword = "${mySecrets.hashedpasswd}";
     };
@@ -456,14 +559,14 @@ in
 
 
     # Enable OpenVPN
-    services.openvpn.servers = {
-        h-b     = { config = '' config /root/.openvpn/h-b/SJ.conf ''; };
-        j-l     = { config = '' config /root/.openvpn/j-l/client.conf ''; };
-        ks      = { config = '' config /root/.openvpn/ks/subi.conf ''; };
-        rp      = { config = '' config /root/.openvpn/rp/client.conf ''; };
-        hme-lan = { config = '' config /root/.openvpn/home-lan/subi.conf ''; };
-        ibs     = { config = '' config /root/.openvpn/ibs/ibs.conf ''; };
-    };
+#    services.openvpn.servers = {
+#        h-b     = { config = '' config /root/.openvpn/h-b/SJ.conf ''; };
+#        j-l     = { config = '' config /root/.openvpn/j-l/client.conf ''; };
+#        ks      = { config = '' config /root/.openvpn/ks/subi.conf ''; };
+#        rp      = { config = '' config /root/.openvpn/rp/client.conf ''; };
+#        hme-lan = { config = '' config /root/.openvpn/home-lan/subi.conf ''; };
+#        ibs     = { config = '' config /root/.openvpn/ibs/ibs.conf ''; };
+#    };
 
 
     # Enable Wireguard
@@ -478,27 +581,35 @@ in
                 persistentKeepalive = 25;
             } ];
         };
-        wg_office = {
-            ips = [ "${mySecrets.wg_office_ips}" ];
+        wg_ons = {
+            ips = [ "${mySecrets.wg_ons_ips}" ];
             privateKey = "${mySecrets.wg_priv_key}";
             peers = [ {
-                allowedIPs = [ "${mySecrets.wg_office_allowed}" ];
-                endpoint = "${mySecrets.wg_office_end}";
-                publicKey = "${mySecrets.wg_office_pubkey}";
+                allowedIPs = [ "${mySecrets.wg_ons_allowed}" ];
+                endpoint = "${mySecrets.wg_ons_end}";
+                publicKey = "${mySecrets.wg_ons_pubkey}";
                 persistentKeepalive = 25;
             } ];
-            postSetup = [
-                # Set Nameserver
-                #"/run/current-system/sw/bin/bash -c 'printf \"nameserver 10.20.10.1\" | /run/current-system/sw/bin/resolvconf -a wg_office -m 0'"
-                # Set Route to WG-Server
-                #"/run/current-system/sw/bin/bash -c 'remoteIP=$(getent servi.home.sjau.ch); remoteIP=${remoteIP% *}; echo "$remoteIP" /tmp/remIP.txt '"
-            ];
-            postShutdown = [
-                # Remove Route to WG-Server
-                #
-                # Remove Nameserver
-                #${pkgs.openresolv}/bin/resolvconf -d wg_office
-            ];
+        };
+        wg_jl = {
+            ips = [ "${mySecrets.wg_jl_ips}" ];
+            privateKey = "${mySecrets.wg_priv_key}";
+            peers = [ {
+                allowedIPs = [ "${mySecrets.wg_jl_allowed}" ];
+                endpoint = "${mySecrets.wg_jl_end}";
+                publicKey = "${mySecrets.wg_jl_pubkey}";
+                persistentKeepalive = 25;
+            } ];
+        };
+        wg_hb = {
+            ips = [ "${mySecrets.wg_hb_ips}" ];
+            privateKey = "${mySecrets.wg_priv_key}";
+            peers = [ {
+                allowedIPs = [ "${mySecrets.wg_hb_allowed}" ];
+                endpoint = "${mySecrets.wg_hb_end}";
+                publicKey = "${mySecrets.wg_hb_pubkey}";
+                persistentKeepalive = 25;
+            } ];
         };
     };
 
@@ -565,7 +676,10 @@ in
     services.syncthing = {
         enable = true;
         dataDir = "/home/${mySecrets.user}/Desktop/Syncthing";
+        configDir = "/home/${mySecrets.user}/.config/syncthing";
         user = "${mySecrets.user}";
+        openDefaultPorts = true;
+        guiAddress = "0.0.0.0:8384";
     };
 
 
@@ -577,8 +691,16 @@ in
     };
 
 
+    # Enable sysstat
+    services.sysstat = {
+        enable = true;
+    };
+
     # Enable Locate
-    services.locate.enable = true;
+    services.locate = {
+        enable = true;
+        prunePaths = [ "/tmp" "/var/tmp" "/var/cache" "/var/lock" "/var/run" "/var/spool" "/mnt/home" "/mnt/ibs" "/mnt/IBS" "/mnt/jus-law" "/mnt/rp" "/mnt/tankServers" "/mnt/tb40" "/mnt/wd40tb" ];
+    };
 
 
     # Time.
@@ -601,14 +723,19 @@ in
         # include /usr/share/nano/sh.nanorc
     '';
 
+    # Setup ADB
+    programs.adb.enable = true;
+    nixpkgs.config.android_sdk.accept_license = true;
 
     # The NixOS release to be compatible with for stateful data such as databases.
     # It will e.g. upgrade databases to newer versions and that can't be reverted by Nixos.
     system.stateVersion = "19.03";
 
     nixpkgs.config.allowUnfree = true;
+#    nixpkgs.config.allowBroken = true;
+
     nixpkgs.config.chromium = {
-        enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works 
+  #      enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works 
     };
 
 
@@ -616,12 +743,14 @@ in
     # $ nix-env -qaP | grep wget
     # List of packages that gets installed....
     environment.systemPackages = with pkgs; [
-        androidenv.platformTools # contains ADB
+#        androidenv.platformTools # contains ADB
+#        android-studio
         aspell
         aspellDicts.de
         aspellDicts.en
         audacity
         bash-completion
+        bind        # provides dig and nslookup
         bluedevil
         bluez
         bluez-tools
@@ -636,7 +765,12 @@ in
         curl
         dcfldd # dd alternative that shows progress and can make different checksums on the fly
         dialog
+        displaylink
+        directvnc
+        dmidecode
         dos2unix
+        dstat
+        easysnap
         enca
         ethtool
         exfat
@@ -662,6 +796,7 @@ in
         gwenview
         hdparm
         htop
+        hunspellDicts.de-ch
         icedtea8_web
         iftop
         imagemagick
@@ -686,7 +821,7 @@ in
         kate
         kcalc
         konversation
-        ktorrent
+#        ktorrent
         okular
         oxygen
         oxygen-icons5
@@ -707,6 +842,8 @@ in
         lxqt.lximage-qt
         manpages
         mc
+        mdadm
+        mediainfo
         mkpasswd
         mktorrent
 #        monodevelop
@@ -719,6 +856,7 @@ in
         nix-index
         nix-info
 #        nix-index # provides nix-locate
+        nix-prefetch-github
 #        nix-repl # do:  :l <nixpkgs> to load the packages, then do qt5.m and hit tab twice
         nmap
         nox     # Easy search for packages
@@ -729,6 +867,7 @@ in
         openssl
         openvpn
 #        palemoon
+        pandoc
         parted
         (pass pkgs)
         patchelf
@@ -736,16 +875,16 @@ in
         pciutils
         pcsctools
         pdftk
-        pgadmin
+#        pgadmin
         php     # PHP-Cli
         pinentry
         pinentry_qt4
         pkgconfig
-        playonlinux
+#        playonlinux
         poppler_utils # provides command_not_found
         pv
         python27Packages.youtube-dl
-        python36Packages.websockify
+        python37Packages.websockify
         psmisc
         pwgen
         qemu
@@ -783,6 +922,7 @@ in
         telnet
         tesseract
         thunderbird
+        tightvnc
         tmux
         unoconv
         unrar
@@ -803,6 +943,8 @@ in
         xpdf    # provides pdftotext
         zip
 
+        # easysnap
+        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/easysnap.nix {})
 
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pastesl/master/pastesl.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/pdfForts/master/pdfForts.nix") {})
@@ -812,22 +954,10 @@ in
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/autoResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/stopResilver.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/freeCache.nix") {})
-        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgStartFix.nix") {})
-#        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/bottle-websocket.nix {})
-#        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/eel.nix {})
-#        (pkgs.callPackage /home/hyper/Desktop/git-repos/nix-expressions/deda.nix {})
-        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/deda.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/checkHosts.nix") {})
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/checkVersion.nix") {})
 
-        # wgDebug - needed for wg debugging
-        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgDebug.nix") {})
-        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/wgRouteAdd.nix") {})
-
         (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/batchsigner.nix") {})
-#        (python3Packages.callPackage /home/hyper/Desktop/git-repos/OCRmyPDF/ocrmypdf.nix {})
-#        (python3Packages.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/sjau/nix-expressions/master/ocrmypdf.nix") {})
-
 #        (pkgs.callPackage (builtins.fetchurl "https://raw.githubusercontent.com/bennofs/nix-index/master/default.nix") {})
 
 #        (pkgs.callPackage ./localsigner.nix {})
