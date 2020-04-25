@@ -9,14 +9,16 @@
     ];
 
   boot.initrd.availableKernelModules = [ "hid" "xhci_hcd" "xhci_pci" "ahci" "usb_storage" "usbhid" ];
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelModules = [ "kvm-intel" "kvm-amd" ];
+  boot.kernelParams = [ "amdgpu.dc=1" ];
   boot.initrd.postDeviceCommands = "sleep 5; zpool import -a; zfs load-key -a";
 #  boot.kernelParams = [ "zfs.zfs_arc_max=6442450944" "boot.debug1devices" ];
   boot.kernel.sysctl = { "vm.swappiness" = 20; "vm.dirty_ratio" = 10; "vm.dirty_background_ratio" = 1; };
 #  boot.extraModulePackages = [ config.boot.kernelPackages.rtlwifi_new config.boot.kernelPackages.wireguard ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.wireguard ];
+#  boot.extraModulePackages = [ config.boot.kernelPackages.wireguard ];
+  boot.extraModulePackages = with config.boot.kernelPackages; [ wireguard ];
   # Deactivate discreet optimus/nvidia card
-  boot.blacklistedKernelModules = [ "nouveau" ];
+#  boot.blacklistedKernelModules = [ "nouveau" ];
 
   fileSystems."/" =
     { device = "tankSubi/encZFS/Nixos";
